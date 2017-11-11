@@ -72,9 +72,9 @@
 		93A26E6E1FB7B5CD00958A8E /* project2 */ = {
 			isa = PBXGroup;
 			children = (
+				93A26E7E1FB7B61C00958A8E /* main.c */,
 				93A26E7C1FB7B61C00958A8E /* forkTools.c */,
 				93A26E7A1FB7B61C00958A8E /* forkTools.h */,
-				93A26E7E1FB7B61C00958A8E /* main.c */,
 				93A26E7F1FB7B61C00958A8E /* mainTools.c */,
 				93A26E781FB7B61C00958A8E /* mainTools.h */,
 				93A26E791FB7B61C00958A8E /* memTools.c */,
