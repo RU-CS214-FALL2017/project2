@@ -6,6 +6,27 @@
 
 #include "forkTools.h"
 
+//struct row {
+//
+//    char color;
+//    char director_name;
+//    unsigned int num_critic_for_reviews;
+//    unsigned int duration;
+//    unsigned int director_facebook_likes;
+//    unsigned int actor_3_facebook_likes;
+//    char actor_2_name;
+//    unsigned int actor_1_facebook_likes;
+//    unsigned long gross;
+//    char genres;
+//    char actor_1_name;
+//    char movie_title;
+//    unsigned long num_voted_users;
+//    unsigned int cast_total_facebook_likes;
+//    char actor_3_name;
+//    int facenumber_in_poster;
+//    char plot_keywords;
+//};
+
 unsigned int tokenizeRow(const char * line, char * ** row);
 void trim (char * str);
 void removeChars (char * str, unsigned long startIndex, unsigned long endIndex);
