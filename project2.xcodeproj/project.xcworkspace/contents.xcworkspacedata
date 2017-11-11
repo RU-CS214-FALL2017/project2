@@ -2,6 +2,39 @@
 <Workspace
    version = "1.0">
    <FileRef
+      location = "group:../project2/forkTools.c">
+   </FileRef>
+   <FileRef
+      location = "group:../project2/forkTools.h">
+   </FileRef>
+   <FileRef
+      location = "group:../project2/main.c">
+   </FileRef>
+   <FileRef
+      location = "group:../project2/mainTools.c">
+   </FileRef>
+   <FileRef
+      location = "group:../project2/mainTools.h">
+   </FileRef>
+   <FileRef
+      location = "group:../project2/memTools.c">
+   </FileRef>
+   <FileRef
+      location = "group:../project2/memTools.h">
+   </FileRef>
+   <FileRef
+      location = "group:../project2/sorter.c">
+   </FileRef>
+   <FileRef
+      location = "group:../project2/sorter.h">
+   </FileRef>
+   <FileRef
+      location = "group:../project2/tools.c">
+   </FileRef>
+   <FileRef
+      location = "group:../project2/tools.h">
+   </FileRef>
+   <FileRef
       location = "self:project2.xcodeproj">
    </FileRef>
 </Workspace>
