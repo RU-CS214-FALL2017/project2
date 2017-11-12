@@ -270,15 +270,15 @@ int isCsv(const char * csvPath) {
 // free, free the returned pointer.
 char * sortedCsvPath(const char * csvPath, const char * columnHeader, const char * outputDir) {
     
-    char temp[strlen(csvPath) + 1];
-    strcpy(temp, csvPath);
+    char * fileName = strrchr(csvPath, '/') + 1;
+    unsigned long fileLen = strlen(fileName);
     
-    char * tempTok = strrchr(csvPath, '/') + 1;
+    char prefix[fileLen + 1];
+    strcpy(prefix, fileName);
+    prefix[fileLen - 4] = '\0';
     
-    tempTok[strlen(tempTok) - 4] = '\0';
-    
-    char * ret = (char * ) malloc(strlen(outputDir) + strlen(tempTok) + strlen(columnHeader) + 14);
-    sprintf(ret, "%s/%s-sorted-%s.csv", outputDir, tempTok, columnHeader);
+    char * ret = (char * ) malloc(strlen(outputDir) + strlen(prefix) + strlen(columnHeader) + 14);
+    sprintf(ret, "%s/%s-sorted-%s.csv", outputDir, prefix, columnHeader);
     
     return ret;
 }
