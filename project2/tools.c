@@ -111,40 +111,40 @@ int tokenizeRow(char * line, char ** row) {
 //    row->movie_facebook_likes = atof(charRow[27]);
 }
 
-// Removes leading and trailing whitespaces from <str>.
-void trim (char * str) {
-    
-    int i = 0;
-    
-    while(str[i] == ' ' || str[i] == '\n' || str[i] == '\t' || str[i] == '\r' || str[i] == '\v'
-          || str[i] == '\f') {
-        i += 1;
-    }
-    
-    removeChars(str, 0, i);
-    
-    unsigned long terminatingIndex = strlen(str);
-    unsigned long j = terminatingIndex - 1;
-    
-    while(str[j] == ' ' || str[j] == '\n' || str[j] == '\t' || str[j] == '\r' || str[j] == '\v'
-          || str[j] == '\f') {
-        j -= 1;
-    }
-    
-    removeChars(str, j + 1, terminatingIndex);
-}
+//// Removes leading and trailing whitespaces from <str>.
+//void trim (char * str) {
+//    
+//    int i = 0;
+//    
+//    while(str[i] == ' ' || str[i] == '\n' || str[i] == '\t' || str[i] == '\r' || str[i] == '\v'
+//          || str[i] == '\f') {
+//        i += 1;
+//    }
+//    
+//    removeChars(str, 0, i);
+//    
+//    unsigned long terminatingIndex = strlen(str);
+//    unsigned long j = terminatingIndex - 1;
+//    
+//    while(str[j] == ' ' || str[j] == '\n' || str[j] == '\t' || str[j] == '\r' || str[j] == '\v'
+//          || str[j] == '\f') {
+//        j -= 1;
+//    }
+//    
+//    removeChars(str, j + 1, terminatingIndex);
+//}
 
-// Removes the characters from <str> between indexes <startIndex> (inclusive)
-// and <endIndex> (exclusive).
-void removeChars (char * str, unsigned long startIndex, unsigned long endIndex) {
-    
-    unsigned long terminatingIndex = strlen(str);
-    
-    for(int i = 0; i <= (terminatingIndex - endIndex); i++) {
-        
-        str[startIndex + i] = str[endIndex + i];
-    }
-}
+//// Removes the characters from <str> between indexes <startIndex> (inclusive)
+//// and <endIndex> (exclusive).
+//void removeChars (char * str, unsigned long startIndex, unsigned long endIndex) {
+//
+//    unsigned long terminatingIndex = strlen(str);
+//
+//    for(int i = 0; i <= (terminatingIndex - endIndex); i++) {
+//
+//        str[startIndex + i] = str[endIndex + i];
+//    }
+//}
 
 // Fills pre-allocated <table> with data from <csvFile>. <cells> is a
 // pre-allocated memory that will be stored with strings of the cells.
@@ -213,18 +213,18 @@ void printTable (FILE * stream, char *** table, unsigned int rows) {
     }
 }
 
-// Returns 1 if <str> is a valid number, else returns 0.
-int isNumber(const char * str) {
-    
-    for (int i = 0; i < strlen(str); i++) {
-        
-        if (!(isdigit(str[i]) || (str[i] == '.'))) {
-            return 0;
-        }
-    }
-
-    return 1;
-}
+//// Returns 1 if <str> is a valid number, else returns 0.
+//int isNumber(const char * str) {
+//
+//    for (int i = 0; i < strlen(str); i++) {
+//
+//        if (!(isdigit(str[i]) || (str[i] == '.'))) {
+//            return 0;
+//        }
+//    }
+//
+//    return 1;
+//}
 
 // If <areNumbers> is set to 0, returns 0 if <y> is lexicographically before <x>,
 // else returns 1. If <areNumbers> is set to anything besides 0, converts <x> and
@@ -239,19 +239,19 @@ int isXBeforeY (const char * x, const char * y, int areNumbers) {
     }
 }
 
-// If all the values in <table> at column index <columnIndex> from row index 1
-// to row index <rows> - 1 are valid numbers, returns 1, else returns 0.
-int isNumericColumn(char *** table, int rows, int columnIndex) {
-    
-    for (int i = 1; i < rows; i++) {
-        
-        if (!isNumber(table[i][columnIndex])) {
-            return 0;
-        }
-    }
-    
-    return 1;
-}
+//// If all the values in <table> at column index <columnIndex> from row index 1
+//// to row index <rows> - 1 are valid numbers, returns 1, else returns 0.
+//int isNumericColumn(char *** table, int rows, int columnIndex) {
+//
+//    for (int i = 1; i < rows; i++) {
+//
+//        if (!isNumber(table[i][columnIndex])) {
+//            return 0;
+//        }
+//    }
+//
+//    return 1;
+//}
 
 // Returns 1 if <csvPath> is a path to a "proper" .csv file, else returns 0.
 int isCsv(const char * csvPath) {
