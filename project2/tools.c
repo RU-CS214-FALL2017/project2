@@ -60,6 +60,8 @@ struct row * tokenizeRow(char * line) {
         line++;
     }
     
+    charRow[crc] = tempCell;
+    
     row->color = charRow[0];
     row->director_name = charRow[1];
     row->num_critic_for_reviews = atof(charRow[2]);
