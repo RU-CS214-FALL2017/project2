@@ -18,57 +18,12 @@ void printDirTreeHelper(FILE * output, pid_t pid, struct sharedMem * sharedMem, 
 // of A, and <row>'s refrence is set to point to A. Returns the
 // number elements in A (columns). To free, free each (*<row>)[i]
 // (0 <= i < # of elements in A) and free *<row>.
-unsigned int tokenizeRow(const char * line, char * ** row) {
-    
-    if (row != NULL) {
-         *row = (char **) malloc(strlen(line) * sizeof(char *));
-    }
-    
-    char tempChar = '\0';
-    char tempCell[TEMPSIZE];
-    int i = 0; // number of columns
-    int j = 0; // number of characters in column field
-    int inQuote = 0;
-    int outQuote = 0;
-    
-    for(int l = 0; l <= strlen(line); l ++) {
-        
-        tempChar = line[l];
-        
-        if ((tempChar == ',' || tempChar == '\0') && !inQuote){
-            
-            tempCell[j] = '\0';
-            trim(tempCell);
-            if (row != NULL) {
-                (*row)[i] = (char *) malloc(strlen(tempCell) * sizeof(char) + 1);
-                strcpy((*row)[i], tempCell);
-            }
-            
-            j = 0;
-            i += 1;
-            
-            outQuote = 0;
-            
-        } else if (tempChar == '"' && inQuote) {
-            inQuote = 0;
-            
-        } else if (tempChar == '"' && !outQuote && !inQuote) {
-            inQuote = 1;
-            
-        } else {
-            
-            tempCell[j] = tempChar;
-            j += 1;
-            if(tempChar != ' '){
-                outQuote = 1;
-            }
-        }
-    }
-    
-    *row = (char **) realloc(*row, i * sizeof(char *));
-    
-    return i;
-}
+//int tokenizeRow(const char * line, struct row * * row) {
+//    
+//    *row = (struct row *) malloc(sizeof(row));
+//    
+//    sscanf(line, "<#const char *restrict, ...#>")
+//}
 
 // Removes leading and trailing whitespaces from <str>.
 void trim (char * str) {
@@ -115,32 +70,32 @@ void removeChars (char * str, unsigned long startIndex, unsigned long endIndex) 
 // set to the number of columns in "table". To free, free each
 // (*<table>)[i][j] (0 <= i < *<rows>, 0 <= j < *<columns>) and free
 // *<table>.
-void fillTable(FILE * csvFile, char * *** table, unsigned int * rows, unsigned int * columns) {
-    
-    *table = (char ***) malloc(TEMPSIZE * TEMPSIZE * sizeof(char **));
-    char line[TEMPSIZE];
-    *rows = 0;
-    *columns = 0;
-    
-    while(fgets(line, TEMPSIZE, csvFile) != NULL) {
-        
-        int tempColumns = tokenizeRow(line, &(*table)[*rows]);
-        
-        if (*rows == 0) {
-            
-            *columns = tempColumns;
-            (*rows)++;
-            
-        } else if (tempColumns == *columns) {
-            (*rows)++;
-            
-        } else {
-            doubleFree((*table)[*rows], tempColumns);
-        }
-    }
-    
-    *table = (char ***) realloc(*table, sizeof(char **) * *rows);
-}
+//void fillTable(FILE * csvFile, char * *** table, unsigned int * rows, unsigned int * columns) {
+//    
+//    *table = (char ***) malloc(TEMPSIZE * TEMPSIZE * sizeof(char **));
+//    char line[TEMPSIZE];
+//    *rows = 0;
+//    *columns = 0;
+//    
+//    while(fgets(line, TEMPSIZE, csvFile) != NULL) {
+//        
+//        int tempColumns = tokenizeRow(line, &(*table)[*rows]);
+//        
+//        if (*rows == 0) {
+//            
+//            *columns = tempColumns;
+//            (*rows)++;
+//            
+//        } else if (tempColumns == *columns) {
+//            (*rows)++;
+//            
+//        } else {
+//            doubleFree((*table)[*rows], tempColumns);
+//        }
+//    }
+//    
+//    *table = (char ***) realloc(*table, sizeof(char **) * *rows);
+//}
 
 // Prints <table> with <rows> rows and <columns> columns in a
 // csv (comma seperated values) format to <stream>.

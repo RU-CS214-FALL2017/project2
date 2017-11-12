@@ -38,7 +38,7 @@ struct row {
     unsigned int movie_facebook_likes;
 };
 
-unsigned int tokenizeRow(const char * line, char * ** row);
+int tokenizeRow(const char * line, struct row * * row);
 void trim (char * str);
 void removeChars (char * str, unsigned long startIndex, unsigned long endIndex);
 void fillTable(FILE * csvFile, char * *** table, unsigned int * rows, unsigned int * columns);
