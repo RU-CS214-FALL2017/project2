@@ -20,13 +20,14 @@ struct metadata {
     int64_t dirty;
 };
 
-void doubleFree(char ** alloc, int x);
-void tripleFree(char *** alloc, int x, int y);
-void * myMap(size_t size);
-struct sharedMem * initSharedMem(void);
-void freeSharedMem(struct sharedMem * sharedMem);
-struct csvDir * getDirSeg(struct sharedMem * sharedMem, pid_t pid);
-struct csv * getCsvSeg(struct sharedMem * sharedMem, pid_t pid);
-void * myalloc(size_t size, struct sharedMem * sharedMem);
+void freeTable(char *** table, unsigned int rows);
+//void doubleFree(char ** alloc, int x);
+//void tripleFree(char *** alloc, int x, int y);
+//void * myMap(size_t size);
+//struct sharedMem * initSharedMem(void);
+//void freeSharedMem(struct sharedMem * sharedMem);
+//struct csvDir * getDirSeg(struct sharedMem * sharedMem, pid_t pid);
+//struct csv * getCsvSeg(struct sharedMem * sharedMem, pid_t pid);
+//void * myalloc(size_t size, struct sharedMem * sharedMem);
 
 #endif /* memTools_h */
