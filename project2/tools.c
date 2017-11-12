@@ -13,9 +13,9 @@
 int findCsvFilesHelper(const char * dirPath, char ** csvPaths, int * numFound);
 void printDirTreeHelper(FILE * output, pid_t pid, struct sharedMem * sharedMem, unsigned int level);
 
-// Tokenizes a CSV row into the pre-allocated <row> sizeof(char **) * 28.
-// <line> is the pre-allocated CSV line/row to tokenize. Returns 1 if 27
-// cells have been tokenized, otherwise returns 0.
+// Tokenizes a CSV row into the pre-allocated <row>. <line> is the
+// pre-allocated CSV line/row to tokenize. Returns 1 if 27 cells
+// have been tokenized, otherwise returns 0.
 int tokenizeRow(char * line, char ** row) {
     
     int rc = 0;
@@ -163,15 +163,17 @@ unsigned int fillTable(FILE * csvFile, char *** table, char * cells) {
             dontAlloc = 0;
             
         } else {
-            table[rows] = (char **) malloc(sizeof(char *) * 28);
+            table[rows] = (char **) malloc(sizeof(char *) * COLUMNS);
         }
         
-        int goodRow = tokenizeRow(cells, table[rows]);
+        unsigned long next = strlen(i) + 1;
+        
+        int goodRow = tokenizeRow(i, table[rows]);
         
         if (goodRow) {
             
             rows++;
-            i += (strlen(i) + 1);
+            i += next;
             
         } else {
             dontAlloc = 1;
@@ -186,9 +188,9 @@ unsigned int fillTable(FILE * csvFile, char *** table, char * cells) {
     return rows;
 }
 
-// Prints <table> with <rows> rows and <columns> columns in a
-// csv (comma seperated values) format to <stream>.
-void printTable (FILE * stream, char *** table, unsigned int rows, unsigned int columns) {
+// Prints <table> with <rows> rowscolumns in a csv
+// (comma seperated values) format to <stream>.
+void printTable (FILE * stream, char *** table, unsigned int rows) {
     
     for (int i = 0; i < rows; i++) {
         
@@ -199,7 +201,7 @@ void printTable (FILE * stream, char *** table, unsigned int rows, unsigned int 
             fprintf(stream, "%s", table[i][0]);
         }
         
-        for (int j = 1; j < columns; j++) {
+        for (int j = 1; j < COLUMNS; j++) {
             
             if(strchr(table[i][j], ',') != NULL) {
                 fprintf(stream, ",\"%s\"", table[i][j]);
@@ -208,8 +210,6 @@ void printTable (FILE * stream, char *** table, unsigned int rows, unsigned int 
                 fprintf(stream, ",%s", table[i][j]);
             }
         }
-        
-        fprintf(stream, "\n");
     }
 }
 

@@ -1,6 +1,8 @@
 #ifndef tools_h
 #define tools_h
 
+#define COLUMNS 28
+
 #include <stdio.h>
 #include <sys/types.h>
 
@@ -42,7 +44,7 @@ int tokenizeRow(char * line, char ** row);
 void trim (char * str);
 void removeChars (char * str, unsigned long startIndex, unsigned long endIndex);
 unsigned int fillTable(FILE * csvFile, char *** table, char * lines);
-void printTable (FILE * stream, char *** table, unsigned int rows, unsigned int columns);
+void printTable (FILE * stream, char *** table, unsigned int rows);
 int isNumber(const char * str);
 int isXBeforeY (const char * x, const char * y, int areNumbers);
 int isNumericColumn(char *** table, int rows, int columnIndex);
