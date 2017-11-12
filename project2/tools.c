@@ -18,11 +18,9 @@ void printDirTreeHelper(FILE * output, pid_t pid, struct sharedMem * sharedMem, 
 // of A, and <row>'s refrence is set to point to A. Returns the
 // number elements in A (columns). To free, free each (*<row>)[i]
 // (0 <= i < # of elements in A) and free *<row>.
-struct row * tokenizeRow(char * line) {
+int tokenizeRow(char * line, char ** row) {
     
-    struct row * row = (struct row *) malloc(sizeof(row));
-    char * charRow[28];
-    int crc = 0;
+    int rc = 0;
     char * tempCell = line;
     char * endLine = line + strlen(line);
     
@@ -32,66 +30,87 @@ struct row * tokenizeRow(char * line) {
     while(line < endLine) {
         
         if(*line == ',' && !inQuote && !beginCell) {
-            
+                
             *line = '\0';
-            charRow[crc] = tempCell;
-            crc++;
+            row[rc] = tempCell;
+            rc++;
             beginCell = 1;
             
-        } else if (*line == '"' && !inQuote) {
+        } else if (*line == '"') {
             
-            inQuote = 1;
-            beginCell = 1;
+            if (inQuote) {
+                
+                *line = '\0';
+                row[rc] = tempCell;
+                rc++;
+                beginCell = 1;
+                
+            } else {
+                
+                inQuote = 1;
+                beginCell = 1;
+            }
             
-        } else if (*line == '"' && inQuote) {
+        } else if (beginCell && *line != ' ') {
             
-            inQuote = 0;
-            *line = '\0';
-            charRow[crc] = tempCell;
-            crc++;
-            beginCell = 1;
-            
-        } else if (beginCell && *line != ' ' && *line != ',') {
-            
-            tempCell = line;
-            beginCell = 0;
+            if (*line == ',') {
+                
+                if (inQuote) {
+                    inQuote = 0;
+                    
+                } else {
+                    
+                    *line = '\0';
+                    row[rc] = line;
+                    rc++;
+                }
+                
+            } else {
+                
+                tempCell = line;
+                beginCell = 0;
+            }
         }
         
         line++;
     }
     
-    charRow[crc] = tempCell;
+    row[rc] = tempCell;
     
-    row->color = charRow[0];
-    row->director_name = charRow[1];
-    row->num_critic_for_reviews = atof(charRow[2]);
-    row->duration = atof(charRow[3]);
-    row->director_facebook_likes = atof(charRow[4]);
-    row->actor_3_facebook_likes = atof(charRow[5]);
-    row->actor_2_name = charRow[6];
-    row->actor_1_facebook_likes = atof(charRow[7]);
-    row->gross = atof(charRow[8]);
-    row->genres = charRow[9];
-    row->actor_1_name = charRow[10];
-    row->movie_title = charRow[11];
-    row->num_voted_users = atof(charRow[12]);
-    row->cast_total_facebook_likes = atof(charRow[13]);
-    row->actor_3_name = charRow[14];
-    row->facenumber_in_poster = atof(charRow[15]);
-    row->plot_keywords = charRow[16];
-    row->movie_imdb_link = charRow[17];
-    row->num_user_for_reviews = atof(charRow[18]);
-    row->language = charRow[19];
-    row->country = charRow[20];
-    row->content_rating = charRow[21];
-    row->budget = atof(charRow[22]);
-    row->title_year = atof(charRow[23]);
-    row->actor_2_facebook_likes = atof(charRow[24]);
-    row->imdb_score = atof(charRow[25]);
-    row->aspect_ratio = atof(charRow[26]);
-    row->movie_facebook_likes = atof(charRow[27]);
+    if (rc == 27) {
+        return 1;
+    }
     
-    return row;
+    return 0;
+    
+//    row->color = charRow[0];
+//    row->director_name = charRow[1];
+//    row->num_critic_for_reviews = atof(charRow[2]);
+//    row->duration = atof(charRow[3]);
+//    row->director_facebook_likes = atof(charRow[4]);
+//    row->actor_3_facebook_likes = atof(charRow[5]);
+//    row->actor_2_name = charRow[6];
+//    row->actor_1_facebook_likes = atof(charRow[7]);
+//    row->gross = atof(charRow[8]);
+//    row->genres = charRow[9];
+//    row->actor_1_name = charRow[10];
+//    row->movie_title = charRow[11];
+//    row->num_voted_users = atof(charRow[12]);
+//    row->cast_total_facebook_likes = atof(charRow[13]);
+//    row->actor_3_name = charRow[14];
+//    row->facenumber_in_poster = atof(charRow[15]);
+//    row->plot_keywords = charRow[16];
+//    row->movie_imdb_link = charRow[17];
+//    row->num_user_for_reviews = atof(charRow[18]);
+//    row->language = charRow[19];
+//    row->country = charRow[20];
+//    row->content_rating = charRow[21];
+//    row->budget = atof(charRow[22]);
+//    row->title_year = atof(charRow[23]);
+//    row->actor_2_facebook_likes = atof(charRow[24]);
+//    row->imdb_score = atof(charRow[25]);
+//    row->aspect_ratio = atof(charRow[26]);
+//    row->movie_facebook_likes = atof(charRow[27]);
 }
 
 // Removes leading and trailing whitespaces from <str>.
