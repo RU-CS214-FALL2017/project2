@@ -268,7 +268,7 @@ int isCsv(const char * csvPath) {
 // If the name of the CSV file located at <path> is A. This function returns
 // the newly allocated string: "<outputDir>/A-sorted-<columnHeader>.csv". To
 // free, free the returned pointer.
-char * sortedCsvPath(const char * csvPath, const char * columnHeader, const char * outputDir) {
+void printToSortedCsvPath(const char * csvPath, const char * columnHeader, const char * outputDir, char *** table, unsigned int rows) {
     
     char * fileName = strrchr(csvPath, '/') + 1;
     unsigned long fileLen = strlen(fileName);
@@ -277,10 +277,12 @@ char * sortedCsvPath(const char * csvPath, const char * columnHeader, const char
     strcpy(prefix, fileName);
     prefix[fileLen - 4] = '\0';
     
-    char * ret = (char * ) malloc(strlen(outputDir) + strlen(prefix) + strlen(columnHeader) + 14);
-    sprintf(ret, "%s/%s-sorted-%s.csv", outputDir, prefix, columnHeader);
+    char sortedCsvPath[strlen(outputDir) + fileLen + strlen(columnHeader) + 10];
+    sprintf(sortedCsvPath, "%s/%s-sorted-%s.csv", outputDir, prefix, columnHeader);
     
-    return ret;
+    FILE * out = fopen(sortedCsvPath, "w");
+    printTable(out, table, rows);
+    fclose(out);
 }
 
 // Returns the index of <columnHeader> in <table> with <columns>
