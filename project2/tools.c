@@ -13,11 +13,9 @@
 int findCsvFilesHelper(const char * dirPath, char ** csvPaths, int * numFound);
 void printDirTreeHelper(FILE * output, pid_t pid, struct sharedMem * sharedMem, unsigned int level);
 
-// <row> is the address to a char **. Creates a array of strings
-// A, where each comma seperated value from <line> is an element
-// of A, and <row>'s refrence is set to point to A. Returns the
-// number elements in A (columns). To free, free each (*<row>)[i]
-// (0 <= i < # of elements in A) and free *<row>.
+// Tokenizes a CSV row into the pre-allocated <row> sizeof(char **) * 28.
+// <line> is the pre-allocated CSV line/row to tokenize. Returns 1 if 27
+// cells have been tokenized, otherwise returns 0.
 int tokenizeRow(char * line, char ** row) {
     
     int rc = 0;
