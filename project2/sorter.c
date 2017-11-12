@@ -16,99 +16,92 @@ void mergeSort(char *** table, const unsigned int columnIndex, const int areNumb
 void merge(char *** table, const unsigned int columnIndex, const int areNumbers,
            const unsigned int start, const unsigned int mid,  const unsigned int end);
 
-// Sorts a the CSV file at <csvPath> in ascending order
-// on the column header <columnHeader>. Saves the sorted
-// csv file in <outputDir>.
-//void sortCsv(const char * csvPath, const char * columnHeaders, const char * outputDir, struct sharedMem * sharedMem) {
-//    
-//    FILE * csv = fopen(csvPath, "r");
-//    
-//    char *** table;
-//    unsigned int rows;
-//    unsigned int columns;
-//    
-//    fillTable(csv, &table, &rows, &columns);
-//    fclose(csv);
-//    
-//    sortByHeaders(csvPath, columnHeaders, table, rows, columns, sharedMem);
-//        
-//    char * outputCsvPath = sortedCsvPath(csvPath, columnHeaders, outputDir);
-//    FILE * sortedCsv = fopen(outputCsvPath, "w");
-//    free(outputCsvPath);
-//    
-//    printTable(sortedCsv, table, rows, columns);
-//    fclose(sortedCsv);
-//    
-//    tripleFree(table, rows, columns);
-//}
+// Sorts a the CSV file at <csvPath> in ascending order on the
+// column header <columnHeader> at index <sortIndex>. Saves the
+// sorted csv file in <outputDir>.
+void sortCsv(const char * csvPath, unsigned int sortIndex, const char * columnHeader, const char * outputDir) {
+    
+    FILE * csv = fopen(csvPath, "r");
+    
+    char *** table = (char ***) malloc(sizeof(char **) * TEMPSIZE * TEMPSIZE);
+    char * cells = (char *) malloc(TEMPSIZE * TEMPSIZE);
+    
+    unsigned int rows = fillTable(csv, table, cells);
+    fclose(csv);
+    
+    sortByHeaders(csvPath, columnHeaders, table, rows, columns, sharedMem);
+    printToSortedCsvPath(csvPath, columnHeader, outputDir, table, rows);
+    
+    freeTable(table, rows);
+}
 
 // Ascendingly sorts <table> with <rows> rows and <columns> columns according to
 // the column with the first header in <columnHeaders>. Cascades the sort on the
 // other headers in <columnHeaders> in order. <columnHeaders> should be a
 // comma-delimited list of headers. Returns 1 if the first header in <columnHeaders>
 // was found, else returns 0. Prints errors for cascaded headers not found.
-//void sortByHeaders(const char * csvPath, const char * columnHeaders, char *** table,
-//                      const unsigned int rows, const unsigned int columns, struct sharedMem * sharedMem) {
-//    
-//    struct csv * csvInfo = getCsvSeg(sharedMem, getpid());
-//    
-//    csvInfo->path = myalloc(strlen(csvPath) + 1, sharedMem);
-//    strcpy(csvInfo->path, csvPath);
-//    csvInfo->error = 0;
-//    
-//    char ** headers;
-//    unsigned int numHeaders = tokenizeRow(columnHeaders, &headers);
-//    
-//    int column = getColumnHeaderIndex(headers[0], table, columns);
-//    if (column == -1) {
-//        
-//        csvInfo->sorted = 0;
-//        csvInfo->error = 1;
-//        char error[TEMPSIZE];
-//        sprintf(error, "Specified column header, %s, not found", headers[0]);
-//        
-//        csvInfo->errors = myalloc(strlen(error) + 1, sharedMem);
-//        strcpy(csvInfo->errors, error);
-//        
-//        exit(EXIT_FAILURE);
-//    }
-//    
-//    mergeSort(table, column, isNumericColumn(table, rows, column), 1, rows);
-//    
-//    int foundHeaders[numHeaders];
-//    foundHeaders[0] = column;
-//    int fhi = 1;
-//    
-//    char errors[TEMPSIZE];
-//    char * errptr = errors;
-//    sprintf(errptr, "Cannot find cascading column headers:");
-//    errptr += strlen(errptr);
-//    
-//    for (int i = 1; i < numHeaders; i++) {
-//        
-//        foundHeaders[fhi] = getColumnHeaderIndex(headers[i], table, columns);
-//        
-//        if (foundHeaders[fhi] == -1) {
-//            
-//            csvInfo->error = 1;
-//            
-//            sprintf(errptr, " %s", headers[i]);
-//            errptr += strlen(errptr);
-//            
-//        } else {
-//            fhi++;
-//        }
-//    }
-//    
-//    if (csvInfo->error) {
-//        
-//        csvInfo->errors = myalloc(strlen(errors) + 1, sharedMem);
-//        strcpy(csvInfo->errors, errors);
-//    }
-//    
-//    cascadeSort(table, rows, 1, rows, foundHeaders, fhi);
-//    csvInfo->sorted = 1;
-//}
+void sortByHeaders(const char * csvPath, const char * columnHeaders, char *** table,
+                      const unsigned int rows, const unsigned int columns, struct sharedMem * sharedMem) {
+    
+    struct csv * csvInfo = getCsvSeg(sharedMem, getpid());
+    
+    csvInfo->path = myalloc(strlen(csvPath) + 1, sharedMem);
+    strcpy(csvInfo->path, csvPath);
+    csvInfo->error = 0;
+    
+    char ** headers;
+    unsigned int numHeaders = tokenizeRow(columnHeaders, &headers);
+    
+    int column = getColumnHeaderIndex(headers[0], table, columns);
+    if (column == -1) {
+        
+        csvInfo->sorted = 0;
+        csvInfo->error = 1;
+        char error[TEMPSIZE];
+        sprintf(error, "Specified column header, %s, not found", headers[0]);
+        
+        csvInfo->errors = myalloc(strlen(error) + 1, sharedMem);
+        strcpy(csvInfo->errors, error);
+        
+        exit(EXIT_FAILURE);
+    }
+    
+    mergeSort(table, column, isNumericColumn(table, rows, column), 1, rows);
+    
+    int foundHeaders[numHeaders];
+    foundHeaders[0] = column;
+    int fhi = 1;
+    
+    char errors[TEMPSIZE];
+    char * errptr = errors;
+    sprintf(errptr, "Cannot find cascading column headers:");
+    errptr += strlen(errptr);
+    
+    for (int i = 1; i < numHeaders; i++) {
+        
+        foundHeaders[fhi] = getColumnHeaderIndex(headers[i], table, columns);
+        
+        if (foundHeaders[fhi] == -1) {
+            
+            csvInfo->error = 1;
+            
+            sprintf(errptr, " %s", headers[i]);
+            errptr += strlen(errptr);
+            
+        } else {
+            fhi++;
+        }
+    }
+    
+    if (csvInfo->error) {
+        
+        csvInfo->errors = myalloc(strlen(errors) + 1, sharedMem);
+        strcpy(csvInfo->errors, errors);
+    }
+    
+    cascadeSort(table, rows, 1, rows, foundHeaders, fhi);
+    csvInfo->sorted = 1;
+}
 
 // Cascades the sort of table with <rows> rows according to headers
 // with indexes <headers>. <headers>[0] is the index of the header
