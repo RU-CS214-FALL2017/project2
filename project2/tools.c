@@ -24,40 +24,40 @@ struct row * tokenizeRow(char * line) {
     char * charRow[28];
     int crc = 0;
     char * tempCell = line;
+    char * endLine = line + strlen(line);
     
     int inQuote = 0;
     int beginCell = 1;
     
-    for(char * i = line; i < line + strlen(line); i++) {
+    while(line < endLine) {
         
-        if(*i == ',' && !inQuote) {
+        if(*line == ',' && !inQuote && !beginCell) {
             
-            *i = '\0';
+            *line = '\0';
             charRow[crc] = tempCell;
             crc++;
             beginCell = 1;
             
-        } else if (*i == '"' && !inQuote) {
+        } else if (*line == '"' && !inQuote) {
             
             inQuote = 1;
             beginCell = 1;
             
-        } else if (*i == '"' && inQuote) {
-            
-            *i = '\0';
-            charRow[crc] = tempCell;
-            crc++;
-            
-        } else if (*i == ',' && inQuote) {
+        } else if (*line == '"' && inQuote) {
             
             inQuote = 0;
+            *line = '\0';
+            charRow[crc] = tempCell;
+            crc++;
             beginCell = 1;
             
-        } else if (beginCell && *i != ' ') {
+        } else if (beginCell && *line != ' ' && *line != ',') {
             
-            tempCell = i;
+            tempCell = line;
             beginCell = 0;
         }
+        
+        line++;
     }
     
     row->color = charRow[0];
