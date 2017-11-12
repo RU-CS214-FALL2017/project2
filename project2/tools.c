@@ -18,12 +18,79 @@ void printDirTreeHelper(FILE * output, pid_t pid, struct sharedMem * sharedMem, 
 // of A, and <row>'s refrence is set to point to A. Returns the
 // number elements in A (columns). To free, free each (*<row>)[i]
 // (0 <= i < # of elements in A) and free *<row>.
-//int tokenizeRow(const char * line, struct row * * row) {
-//    
-//    *row = (struct row *) malloc(sizeof(row));
-//    
-//    sscanf(line, "<#const char *restrict, ...#>")
-//}
+struct row * tokenizeRow(char * line) {
+    
+    struct row * row = (struct row *) malloc(sizeof(row));
+    char * charRow[28];
+    int crc = 0;
+    char * tempCell = line;
+    
+    int inQuote = 0;
+    int beginCell = 1;
+    
+    for(char * i = line; i < line + strlen(line); i++) {
+        
+        if(*i == ',' && !inQuote) {
+            
+            *i = '\0';
+            charRow[crc] = tempCell;
+            crc++;
+            beginCell = 1;
+            
+        } else if (*i == '"' && !inQuote) {
+            
+            inQuote = 1;
+            beginCell = 1;
+            
+        } else if (*i == '"' && inQuote) {
+            
+            *i = '\0';
+            charRow[crc] = tempCell;
+            crc++;
+            
+        } else if (*i == ',' && inQuote) {
+            
+            inQuote = 0;
+            beginCell = 1;
+            
+        } else if (beginCell && *i != ' ') {
+            
+            tempCell = i;
+            beginCell = 0;
+        }
+    }
+    
+    row->color = charRow[0];
+    row->director_name = charRow[1];
+    row->num_critic_for_reviews = atof(charRow[2]);
+    row->duration = atof(charRow[3]);
+    row->director_facebook_likes = atof(charRow[4]);
+    row->actor_3_facebook_likes = atof(charRow[5]);
+    row->actor_2_name = charRow[6];
+    row->actor_1_facebook_likes = atof(charRow[7]);
+    row->gross = atof(charRow[8]);
+    row->genres = charRow[9];
+    row->actor_1_name = charRow[10];
+    row->movie_title = charRow[11];
+    row->num_voted_users = atof(charRow[12]);
+    row->cast_total_facebook_likes = atof(charRow[13]);
+    row->actor_3_name = charRow[14];
+    row->facenumber_in_poster = atof(charRow[15]);
+    row->plot_keywords = charRow[16];
+    row->movie_imdb_link = charRow[17];
+    row->num_user_for_reviews = atof(charRow[18]);
+    row->language = charRow[19];
+    row->country = charRow[20];
+    row->content_rating = charRow[21];
+    row->budget = atof(charRow[22]);
+    row->title_year = atof(charRow[23]);
+    row->actor_2_facebook_likes = atof(charRow[24]);
+    row->imdb_score = atof(charRow[25]);
+    row->aspect_ratio = atof(charRow[26]);
+    row->movie_facebook_likes = atof(charRow[27]);
+    
+    return row;
+}
 
 // Removes leading and trailing whitespaces from <str>.
 void trim (char * str) {
