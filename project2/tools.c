@@ -146,42 +146,45 @@ void removeChars (char * str, unsigned long startIndex, unsigned long endIndex) 
     }
 }
 
-// <table> is an address to a char ***. <rows> is an address to
-// an unsigned int. <columns> is an address to an unsigned int.
-// Creates a "table" from <csvFile> as a 2D string array, where
-// A[n][m] will return a string representation of the data stored
-// in the (n+1)th row and (m+1)th column of the "table". <table>'s
-// refrence is set to point to the created "table". <rows>' refrence
-// is set to the numbers of rows in "table". <columns>' refrence is
-// set to the number of columns in "table". To free, free each
-// (*<table>)[i][j] (0 <= i < *<rows>, 0 <= j < *<columns>) and free
-// *<table>.
-//void fillTable(FILE * csvFile, char * *** table, unsigned int * rows, unsigned int * columns) {
-//    
-//    *table = (char ***) malloc(TEMPSIZE * TEMPSIZE * sizeof(char **));
-//    char line[TEMPSIZE];
-//    *rows = 0;
-//    *columns = 0;
-//    
-//    while(fgets(line, TEMPSIZE, csvFile) != NULL) {
-//        
-//        int tempColumns = tokenizeRow(line, &(*table)[*rows]);
-//        
-//        if (*rows == 0) {
-//            
-//            *columns = tempColumns;
-//            (*rows)++;
-//            
-//        } else if (tempColumns == *columns) {
-//            (*rows)++;
-//            
-//        } else {
-//            doubleFree((*table)[*rows], tempColumns);
-//        }
-//    }
-//    
-//    *table = (char ***) realloc(*table, sizeof(char **) * *rows);
-//}
+// Fills pre-allocated <table> with data from <csvFile>. <cells> is a
+// pre-allocated memory that will be stored with strings of the cells.
+// Returns the number of rows in table. To free, free <table>[i], 0 <
+// i < return value.
+unsigned int fillTable(FILE * csvFile, char *** table, char * cells) {
+    
+    unsigned int rows = 0;
+    char * i = cells;
+    
+    int dontAlloc = 0;
+    
+    while(fgets(i, TEMPSIZE, csvFile) != NULL) {
+        
+        if (dontAlloc) {
+            dontAlloc = 0;
+            
+        } else {
+            table[rows] = (char **) malloc(sizeof(char *) * 28);
+        }
+        
+        int goodRow = tokenizeRow(cells, table[rows]);
+        
+        if (goodRow) {
+            
+            rows++;
+            i += (strlen(i) + 1);
+            
+        } else {
+            dontAlloc = 1;
+        }
+        
+    }
+    
+    if(dontAlloc == 1) {
+        free(table[rows]);
+    }
+    
+    return rows;
+}
 
 // Prints <table> with <rows> rows and <columns> columns in a
 // csv (comma seperated values) format to <stream>.
