@@ -273,14 +273,7 @@ char * sortedCsvPath(const char * csvPath, const char * columnHeader, const char
     char temp[strlen(csvPath) + 1];
     strcpy(temp, csvPath);
     
-    char * token = strtok(temp, "/");
-    char * tempTok = NULL;
-    
-    while (token != NULL) {
-        
-        tempTok = token;
-        token = strtok(NULL, "/");
-    }
+    char * tempTok = strrchr(csvPath, '/') + 1;
     
     tempTok[strlen(tempTok) - 4] = '\0';
     
