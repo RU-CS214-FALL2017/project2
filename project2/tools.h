@@ -57,5 +57,6 @@ int getColumnHeaderIndex(const char * columnHeader,
 void printDirTree(FILE * output, struct sharedMem * sharedMem);
 unsigned int dirSubProcessCount(pid_t dirPid, struct sharedMem * sharedMem);
 void checkDir(const char * path, const char * dirType);
+unsigned int getIndex(const char * header, int * isNumeric);
 
 #endif /* tools_h */

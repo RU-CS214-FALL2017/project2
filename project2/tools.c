@@ -372,19 +372,19 @@ void checkDir(const char * path, const char * dirType) {
         switch (errno) {
                 
             case EACCES:
-                printf("You do not have access to the specified %s directory, %s\n", dirType, path);
+                fprintf(stderr, "You do not have access to the specified %s directory, %s\n", dirType, path);
                 break;
                 
             case ENOENT:
-                printf("The specified %s directory, %s, does not exist\n", dirType, path);
+                fprintf(stderr, "The specified %s directory, %s, does not exist\n", dirType, path);
                 break;
                 
             case ENOTDIR:
-                printf("The specified %s directory, %s, is not a directory\n", dirType, path);
+                fprintf(stderr, "The specified %s directory, %s, is not a directory\n", dirType, path);
                 break;
                 
             default:
-                printf("A problem occured opening the specified %s directory, %s", dirType, path);
+                fprintf(stderr, "A problem occured opening the specified %s directory, %s", dirType, path);
                 break;
         }
         
@@ -393,5 +393,97 @@ void checkDir(const char * path, const char * dirType) {
     }
     
     closedir(dir);
+}
+
+unsigned int getIndex(const char * header, int * isNumeric) {
+    
+    if (!strcmp("color", header)) {
+        *isNumeric = 0;
+        return 0;
+    } else if (!strcmp("director_name", header)) {
+        *isNumeric = 0;
+        return 1;
+    } else if (!strcmp("num_critic_for_reviews", header)) {
+        *isNumeric = 1;
+        return 2;
+    } else if (!strcmp("duration", header)) {
+        *isNumeric = 1;
+        return 3;
+    } else if (!strcmp("director_facebook_likes", header)) {
+        *isNumeric = 1;
+        return 4;
+    } else if (!strcmp("actor_3_facebook_likes", header)) {
+        *isNumeric = 1;
+        return 5;
+    } else if (!strcmp("actor_2_name", header)) {
+        *isNumeric = 0;
+        return 6;
+    } else if (!strcmp("actor_1_facebook_likes", header)) {
+        *isNumeric = 1;
+        return 7;
+    } else if (!strcmp("gross", header)) {
+        *isNumeric = 1;
+        return 8;
+    } else if (!strcmp("genres", header)) {
+        *isNumeric = 0;
+        return 9;
+    } else if (!strcmp("actor_1_name", header)) {
+        *isNumeric = 0;
+        return 10;
+    } else if (!strcmp("movie_title", header)) {
+        *isNumeric = 0;
+        return 11;
+    } else if (!strcmp("num_voted_users", header)) {
+        *isNumeric = 1;
+        return 12;
+    } else if (!strcmp("cast_total_facebook_likes", header)) {
+        *isNumeric = 1;
+        return 13;
+    } else if (!strcmp("actor_3_name", header)) {
+        *isNumeric = 0;
+        return 14;
+    } else if (!strcmp("facenumber_in_poster", header)) {
+        *isNumeric = 1;
+        return 15;
+    } else if (!strcmp("plot_keywords", header)) {
+        *isNumeric = 0;
+        return 16;
+    } else if (!strcmp("movie_imdb_link", header)) {
+        *isNumeric = 0;
+        return 17;
+    } else if (!strcmp("num_user_for_reviews", header)) {
+        *isNumeric = 1;
+        return 18;
+    } else if (!strcmp("language", header)) {
+        *isNumeric = 0;
+        return 19;
+    } else if (!strcmp("country", header)) {
+        *isNumeric = 0;
+        return 20;
+    } else if (!strcmp("content_rating", header)) {
+        *isNumeric = 0;
+        return 21;
+    } else if (!strcmp("budget", header)) {
+        *isNumeric = 1;
+        return 22;
+    } else if (!strcmp("title_year", header)) {
+        *isNumeric = 1;
+        return 23;
+    } else if (!strcmp("actor_2_facebook_likes", header)) {
+        *isNumeric = 1;
+        return 24;
+    } else if (!strcmp("imdb_score", header)) {
+        *isNumeric = 1;
+        return 25;
+    } else if (!strcmp("aspect_ratio", header)) {
+        *isNumeric = 1;
+        return 26;
+    } else if (!strcmp("movie_facebook_likes", header)) {
+        *isNumeric = 1;
+        return 27;
+    } else {
+        fprintf(stderr, "The specified header, %s, was not found\n", header);
+        exit(EXIT_FAILURE);
+    }
 }
 
