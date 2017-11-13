@@ -9,6 +9,9 @@
          contextName = "tokenizeRow:tools.c">
       </ContextState>
       <ContextState
+         contextName = "merge:sorter.c">
+      </ContextState>
+      <ContextState
          contextName = "fillTable:tools.c">
       </ContextState>
    </ContextStates>
