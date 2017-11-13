@@ -287,18 +287,18 @@ void printToSortedCsvPath(const char * csvPath, const char * columnHeader, const
 
 // Returns the index of <columnHeader> in <table> with <columns>
 // columns. If <columnHeader> not found, return -1.
-int getColumnHeaderIndex(const char * columnHeader,
-                         char *** table, const unsigned int columns) {
-    
-    for (int i = 0; i < columns; i++) {
-        
-        if (!strcmp(columnHeader, table[0][i])) {
-            return i;
-        }
-    }
-    
-    return -1;
-}
+//int getColumnHeaderIndex(const char * columnHeader,
+//                         char *** table, const unsigned int columns) {
+//
+//    for (int i = 0; i < columns; i++) {
+//
+//        if (!strcmp(columnHeader, table[0][i])) {
+//            return i;
+//        }
+//    }
+//
+//    return -1;
+//}
 
 //void printDirTree(FILE * output, struct sharedMem * sharedMem) {
 //    printDirTreeHelper(output, getpid(), sharedMem, 0);
