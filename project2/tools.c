@@ -1,15 +1,15 @@
 #include <string.h>
 #include <stdlib.h>
-#include <ctype.h>
+//#include <ctype.h>
 #include <dirent.h>
 #include <errno.h>
-#include <sys/types.h>
-#include <unistd.h>
+//#include <sys/types.h>
+//#include <unistd.h>
 #include <pthread.h>
-
+//
 #include "tools.h"
-#include "forkTools.h"
-#include "memTools.h"
+//#include "forkTools.h"
+//#include "memTools.h"
 #include "sorter.h"
 
 int findCsvFilesHelper(const char * dirPath, char ** csvPaths, int * numFound);
@@ -501,35 +501,26 @@ void * processCsvDir(void * threadParams) {
 
     for (struct dirent * entry = readdir(dir); entry != NULL; entry = readdir(dir)) {
 
-        if (entry->d_type == DT_DIR && strcmp(entry->d_name, ".") && strcmp(entry->d_name, "..")) {
+        if ((entry->d_type == DT_DIR && strcmp(entry->d_name, ".") && strcmp(entry->d_name, "..")) || entry->d_type == DT_REG) {
             
-            struct threadParams subParams;
-            subParams.header = params->header;
-            subParams.isNumeric = params->isNumeric;
-            subParams.output = params->output;
-            subParams.sortIndex = params->sortIndex;
-            sprintf(subParams.path, "%s/%s", params->path, entry->d_name);
+            struct threadParams * subParams = (struct threadParams *) malloc(sizeof(struct threadParams));
+            subParams->header = params->header;
+            subParams->isNumeric = params->isNumeric;
+            subParams->output = params->output;
+            subParams->sortIndex = params->sortIndex;
+            sprintf(subParams->path, "%s/%s", params->path, entry->d_name);
             
-            pthread_create(children + cc, NULL, processCsvDir, &subParams);
+            if (entry->d_type == DT_DIR) {
+                pthread_create(children + cc, NULL, processCsvDir, subParams);
+            } else {
+                pthread_create(children + cc, NULL, sortCsv, subParams);
+            }
+            
             cc++;
             
-            printf("%u,", children[cc]);
-            fflush(stdout);
+//            printf("%lu,", children[cc]);
+//            fflush(stdout);
 
-        } else if (entry->d_type == DT_REG) {
-            
-            struct threadParams subParams;
-            subParams.header = params->header;
-            subParams.isNumeric = params->isNumeric;
-            subParams.output = params->output;
-            subParams.sortIndex = params->sortIndex;
-            sprintf(subParams.path, "%s/%s", params->path, entry->d_name);
-        
-            pthread_create(children + cc, NULL, sortCsv, &subParams);
-            cc++;
-            
-            printf("%u,", children[cc]);
-            fflush(stdout);
         }
     }
 
@@ -539,6 +530,7 @@ void * processCsvDir(void * threadParams) {
         pthread_join(children[i], NULL);
     }
     
+    free(threadParams);
     pthread_exit(NULL);
 }
 

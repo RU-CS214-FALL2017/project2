@@ -22,6 +22,14 @@ void * sortCsv(void * threadParams) {
     
     struct threadParams * params = (struct threadParams *) threadParams;
     
+    if (!isCsv(params->path)) {
+        
+        fprintf(stderr, "%s, not a CSV\n", params->path);
+        fflush(stderr);
+        free(threadParams);
+        pthread_exit(NULL);
+    }
+    
     FILE * csv = fopen(params->path, "r");
     
     char *** table = (char ***) malloc(sizeof(char **) * TEMPSIZE * TEMPSIZE);
@@ -35,6 +43,8 @@ void * sortCsv(void * threadParams) {
     
     freeTable(table, rows);
     
+    printf("sorted, %s\n", params->path);
+    fflush(stdout);
     pthread_exit(NULL);
 }
 
@@ -134,7 +144,7 @@ void merge(char *** table, unsigned int columnIndex, int isNumeric, unsigned int
 
     while(s < mid && m < end) {
         
-        if(isXBeforeY((table)[s][columnIndex], (table)[m][columnIndex], isNumeric)) {
+        if(isXBeforeY(table[s][columnIndex], table[m][columnIndex], isNumeric)) {
             
             temp[i] = (table)[s];
             s++;
@@ -166,7 +176,7 @@ void merge(char *** table, unsigned int columnIndex, int isNumeric, unsigned int
     
     for (int j = 0; j < i; j++) {
         
-        (table)[s] = temp[j];
+        table[s] = temp[j];
         s++;
     }
 }
