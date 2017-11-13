@@ -45,6 +45,8 @@ void * sortCsv(void * threadParams) {
     
     printf("sorted, %s\n", params->path);
     fflush(stdout);
+    
+    free(threadParams);
     pthread_exit(NULL);
 }
 
