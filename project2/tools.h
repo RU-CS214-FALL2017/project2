@@ -8,6 +8,15 @@
 
 #include "forkTools.h"
 
+struct threadParams {
+    
+    char path[TEMPSIZE];
+    char * header;
+    char * output;
+    unsigned int sortIndex;
+    int isNumeric;
+};
+
 //struct row {
 //
 //    char * color;
@@ -58,5 +67,6 @@ void printDirTree(FILE * output, struct sharedMem * sharedMem);
 unsigned int dirSubProcessCount(pid_t dirPid, struct sharedMem * sharedMem);
 void checkDir(const char * path, const char * dirType);
 unsigned int getIndex(const char * header, int * isNumeric);
+void * processCsvDir(void * threadParams);
 
 #endif /* tools_h */

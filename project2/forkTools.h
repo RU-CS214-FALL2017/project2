@@ -24,7 +24,7 @@ struct csvDir {
     unsigned int numCsvs;
 };
 
-void processCsvDir(const char * path, struct sharedMem * sharedMem,
-                   const char * columnHeaders, const char * outputDir);
+//void processCsvDir(const char * path, struct sharedMem * sharedMem,
+//                   const char * columnHeaders, const char * outputDir);
 
 #endif /* forkTools_h */

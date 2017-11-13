@@ -5,10 +5,12 @@
 #include <errno.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <pthread.h>
 
 #include "tools.h"
 #include "forkTools.h"
 #include "memTools.h"
+#include "sorter.h"
 
 int findCsvFilesHelper(const char * dirPath, char ** csvPaths, int * numFound);
 void printDirTreeHelper(FILE * output, pid_t pid, struct sharedMem * sharedMem, unsigned int level);
@@ -485,5 +487,58 @@ unsigned int getIndex(const char * header, int * isNumeric) {
         fprintf(stderr, "The specified header, %s, was not found\n", header);
         exit(EXIT_FAILURE);
     }
+}
+
+
+void * processCsvDir(void * threadParams) {
+
+    struct threadParams * params = (struct threadParams *) threadParams;
+    
+    DIR * dir = opendir(params->path);
+    
+    pthread_t children[TEMPSIZE];
+    unsigned int cc = 0;
+
+    for (struct dirent * entry = readdir(dir); entry != NULL; entry = readdir(dir)) {
+
+        if (entry->d_type == DT_DIR && strcmp(entry->d_name, ".") && strcmp(entry->d_name, "..")) {
+            
+            struct threadParams subParams;
+            subParams.header = params->header;
+            subParams.isNumeric = params->isNumeric;
+            subParams.output = params->output;
+            subParams.sortIndex = params->sortIndex;
+            sprintf(subParams.path, "%s/%s", params->path, entry->d_name);
+            
+            pthread_create(children + cc, NULL, processCsvDir, &subParams);
+            cc++;
+            
+            printf("%u,", children[cc]);
+            fflush(stdout);
+
+        } else if (entry->d_type == DT_REG) {
+            
+            struct threadParams subParams;
+            subParams.header = params->header;
+            subParams.isNumeric = params->isNumeric;
+            subParams.output = params->output;
+            subParams.sortIndex = params->sortIndex;
+            sprintf(subParams.path, "%s/%s", params->path, entry->d_name);
+        
+            pthread_create(children + cc, NULL, sortCsv, &subParams);
+            cc++;
+            
+            printf("%u,", children[cc]);
+            fflush(stdout);
+        }
+    }
+
+    closedir(dir);
+    
+    for (int i = 0; i < cc; i++) {
+        pthread_join(children[i], NULL);
+    }
+    
+    pthread_exit(NULL);
 }
 
