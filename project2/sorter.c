@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <pthread.h>
 
 #include "tools.h"
 #include "sorter.h"
@@ -17,9 +18,11 @@ void merge(char *** table, unsigned int columnIndex, int isNumeric, unsigned int
 // Sorts a the CSV file at <csvPath> in ascending order on the
 // column header <columnHeader> at index <sortIndex>. Saves the
 // sorted csv file in <outputDir>.
-void sortCsv(const char * csvPath, unsigned int sortIndex, int isNumeric, const char * columnHeader, const char * outputDir) {
+void * sortCsv(void * threadParams) {
     
-    FILE * csv = fopen(csvPath, "r");
+    struct threadParams * params = (struct threadParams *) threadParams;
+    
+    FILE * csv = fopen(params->path, "r");
     
     char *** table = (char ***) malloc(sizeof(char **) * TEMPSIZE * TEMPSIZE);
     char * cells = (char *) malloc(TEMPSIZE * TEMPSIZE);
@@ -27,10 +30,12 @@ void sortCsv(const char * csvPath, unsigned int sortIndex, int isNumeric, const 
     unsigned int rows = fillTable(csv, table, cells);
     fclose(csv);
     
-    mergeSort(table, sortIndex, isNumeric, 1, rows);
-    printToSortedCsvPath(csvPath, columnHeader, outputDir, table, rows);
+    mergeSort(table, params->sortIndex, params->isNumeric, 1, rows);
+    printToSortedCsvPath(params->path, params->header, params->output, table, rows);
     
     freeTable(table, rows);
+    
+    pthread_exit(NULL);
 }
 
 // Ascendingly sorts <table> with <rows> rows and <columns> columns according to
