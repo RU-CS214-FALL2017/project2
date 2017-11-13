@@ -1,6 +1,6 @@
 #ifndef sorter_h
 #define sorter_h
 
-void sortCsv(const char * csvPath, const char * columnHeaders, const char * outputDir, struct sharedMem * sharedMem);
+void sortCsv(const char * csvPath, unsigned int sortIndex, int isNumeric, const char * columnHeader, const char * outputDir);
 
 #endif /* sorter_h */
