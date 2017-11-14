@@ -216,65 +216,56 @@ void removeTrail(char * str) {
 // Returns the number of successful rows in table, returns 0 if <csvFile>
 // is not a proper movie_metadata CSV. Reallocates <table> and <cells>.
 // To free, free <table>[i], 0 < i <return value.
-unsigned int fillTable(const char * csvPath, char * *** table, char * * cells) {
+unsigned int fillTable(const char * csvPath, char * *** table, char * ** rows, char * * cells) {
     
     (*table) = (char ***) malloc(sizeof(char **) * TEMPSIZE * TEMPSIZE);
+    (*rows) = (char **) malloc(sizeof(char *) * COLUMNS * TEMPSIZE * TEMPSIZE);
     (*cells) = (char *) malloc(TEMPSIZE * TEMPSIZE);
     
-    unsigned int rows = 0;
+    unsigned int numRows = 0;
     char * i = (*cells);
-    
-    int dontAlloc = 0;
+    char ** j = (*rows);
     
     FILE * csvFile = fopen(csvPath, "r");
     
     while(fgets(i, TEMPSIZE, csvFile) != NULL) {
         
-        if (dontAlloc) {
-            dontAlloc = 0;
-            
-        } else {
-            (*table)[rows] = (char **) malloc(sizeof(char *) * COLUMNS);
-        }
+        (*table)[numRows] = j;
         
         unsigned long next = strlen(i) + 1;
         
         int goodRow = 0;
         
-        if (!rows) {
-            goodRow = tokenizeRow(i, (*table)[rows], 1);
+        if (!numRows) {
+            goodRow = tokenizeRow(i, (*table)[numRows], 1);
         } else {
-            goodRow = tokenizeRow(i, (*table)[rows], 0);
+            goodRow = tokenizeRow(i, (*table)[numRows], 0);
         }
         
         if (goodRow) {
             
-            rows++;
+            numRows++;
             i += next;
+            j += sizeof(char *) * COLUMNS;
             
-        } else if (!rows) {
+        } else if (!numRows) {
             
             fclose(csvFile);
-            free(*(*table));
+            free((*table));
+            free((*rows));
             free((*cells));
             return 0;
             
-        } else {
-            dontAlloc = 1;
         }
-        
-    }
-    
-    if(dontAlloc == 1) {
-        free((*table)[rows]);
     }
     
     fclose(csvFile);
     
-    (*table) = (char ***) realloc((*table), sizeof(char **) * rows);
+    (*table) = (char ***) realloc((*table), sizeof(char **) * numRows);
+    (*rows) = realloc((*rows), j - (*rows));
     (*cells) = (char *) realloc((*cells), i - (*cells));
     
-    return rows;
+    return numRows;
 }
 
 // Prints <table> with <rows> rowscolumns in a csv
@@ -299,6 +290,8 @@ void printTable (FILE * stream, char *** table, unsigned int rows) {
                 fprintf(stream, ",%s", table[i][j]);
             }
         }
+        
+        fprintf(stream, "\n");
     }
 }
 

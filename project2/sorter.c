@@ -31,22 +31,23 @@ void * sortCsv(void * threadParams) {
     }
     
     char *** table;
+    char ** rows;
     char * cells;
-    unsigned int rows = fillTable(params->path, &table, &cells);
+    unsigned int numRows = fillTable(params->path, &table, &rows, &cells);
     
-    if (!rows) {
+    if (!numRows) {
         fprintf(stderr, "Not a proper movie_metadata CSV file: %s\n", params->path);
         fflush(stderr);
         free(threadParams);
-        free(table);
-        free(cells);
         pthread_exit(NULL);
     }
     
-    mergeSort(table, params->sortIndex, params->isNumeric, 1, rows);
-    printToSortedCsvPath(params->path, params->header, params->output, table, rows);
+    mergeSort(table, params->sortIndex, params->isNumeric, 1, numRows);
+    printToSortedCsvPath(params->path, params->header, params->output, table, numRows);
     
-    freeTable(table, rows);
+    free(table);
+    free(rows);
+    free(cells);
     
     printf("sorted, %s\n", params->path);
     fflush(stdout);
