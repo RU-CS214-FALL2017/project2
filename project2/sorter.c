@@ -30,24 +30,20 @@ void * sortCsv(void * threadParams) {
         pthread_exit(NULL);
     }
     
-    char *** table;
-    char ** rows;
-    char * cells;
-    unsigned int numRows = fillTable(params->path, &table, &rows, &cells);
+    struct table table;
     
-    if (!numRows) {
+    if (!fillTable(params->path, &table)) {
+        
         fprintf(stderr, "Not a proper movie_metadata CSV file: %s\n", params->path);
         fflush(stderr);
         free(threadParams);
         pthread_exit(NULL);
     }
     
-    mergeSort(table, params->sortIndex, params->isNumeric, 1, numRows);
-    printToSortedCsvPath(params->path, params->header, params->output, table, numRows);
+    mergeSort(table.table, params->sortIndex, params->isNumeric, 1, table.numRows);
+    printToSortedCsvPath(params->path, params->header, params->output, table.table, table.numRows);
     
-    free(table);
-    free(rows);
-    free(cells);
+    freeTable(table);
     
     printf("sorted, %s\n", params->path);
     fflush(stdout);

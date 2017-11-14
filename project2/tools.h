@@ -7,7 +7,16 @@
 #include <stdio.h>
 #include <sys/types.h>
 
-#include "forkTools.h"
+//#include "forkTools.h"
+
+struct table {
+  
+    char *** table;
+    char ** rows;
+    char * cells;
+    size_t cellsSize;
+    unsigned int numRows;
+};
 
 struct threadParams {
     
@@ -56,7 +65,7 @@ int tokenizeRow(char * line, char ** row, int isHeader);
 void removeTrail(char * str);
 void trim (char * str);
 void removeChars (char * str, unsigned long startIndex, unsigned long endIndex);
-unsigned int fillTable(const char * csvPath, char * *** table, char * ** rows, char * * cells);
+int fillTable(const char * csvPath, struct table * table);
 void printTable (FILE * stream, char *** table, unsigned int rows);
 int isNumber(const char * str);
 int isXBeforeY (const char * x, const char * y, int areNumbers);
@@ -67,8 +76,8 @@ unsigned int lineageParser(const char * path, char * ** lineage);
 void printToSortedCsvPath(const char * csvPath, const char * columnHeader, const char * outputDir, char *** table, unsigned int rows);
 int getColumnHeaderIndex(const char * columnHeader,
                          char *** table, const unsigned int columns);
-void printDirTree(FILE * output, struct sharedMem * sharedMem);
-unsigned int dirSubProcessCount(pid_t dirPid, struct sharedMem * sharedMem);
+//void printDirTree(FILE * output, struct sharedMem * sharedMem);
+//unsigned int dirSubProcessCount(pid_t dirPid, struct sharedMem * sharedMem);
 void checkDir(const char * path, const char * dirType);
 unsigned int getIndex(const char * header, int * isNumeric);
 void * processCsvDir(void * threadParams);

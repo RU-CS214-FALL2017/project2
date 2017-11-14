@@ -5,8 +5,9 @@
 #include <sys/mman.h>
 #include <string.h>
 
-#include "forkTools.h"
+//#include "forkTools.h"
 #include "memTools.h"
+//#include "tools.h"
 
 //#define META_PTR_CAST (struct metadata *)
 //#define CHAR_PTR_CAST (char *)
@@ -19,13 +20,44 @@
 //void * getMySharedSeg(struct sharedMem * sharedMem);
 //void initMetadata(void * memSeg, size_t size);
 
-void freeTable(char *** table, unsigned int rows) {
+void freeTable(struct table table) {
     
-    for (int i = 0; i < rows; i++) {
-        free(table[i]);
+    free(table.cells);
+    free(table.rows);
+    free(table.table);
+}
+
+void reAllocTable(struct table * table) {
+    
+    char ** oldRows = table->rows;
+    char * oldCells = table->cells;
+    
+    table->cells = (char *) realloc(oldCells, table->cellsSize);
+    
+    if (table->cells != oldCells) {
+        
+        long difference = oldCells - table->cells;
+        
+        for (char ** i = oldRows; i < oldRows + (table->numRows * sizeof(char *) * COLUMNS); i += sizeof(char *) * COLUMNS) {
+            
+            for (int j = 0; j < COLUMNS; j++) {
+                i[j] -= difference;
+            }
+        }
     }
     
-    free(table);
+    table->rows = (char **) realloc(oldRows, sizeof(char *) * COLUMNS * table->numRows);
+    
+    if (table->rows != oldRows) {
+        
+        long difference = oldRows - table->rows;
+        
+        for (int i = 0; i < table->numRows; i++) {
+            table->table[i] -= difference;
+        }
+    }
+    
+    table->table = (char ***) realloc(table->table, sizeof(char **) * table->numRows);
 }
 
 //// Frees <alloc>[i] (0 <= i < <x>) and <alloc>.

@@ -9,11 +9,11 @@
 //
 #include "tools.h"
 //#include "forkTools.h"
-//#include "memTools.h"
+#include "memTools.h"
 #include "sorter.h"
 
 int findCsvFilesHelper(const char * dirPath, char ** csvPaths, int * numFound);
-void printDirTreeHelper(FILE * output, pid_t pid, struct sharedMem * sharedMem, unsigned int level);
+//void printDirTreeHelper(FILE * output, pid_t pid, struct sharedMem * sharedMem, unsigned int level);
 
 // Headers of a proper movie_metadata CSV.
 const char * MovieHeaders[28] = {
@@ -216,30 +216,30 @@ void removeTrail(char * str) {
 // Returns the number of successful rows in table, returns 0 if <csvFile>
 // is not a proper movie_metadata CSV. Reallocates <table> and <cells>.
 // To free, free <table>[i], 0 < i <return value.
-unsigned int fillTable(const char * csvPath, char * *** table, char * ** rows, char * * cells) {
+int fillTable(const char * csvPath, struct table * table) {
     
-    (*table) = (char ***) malloc(sizeof(char **) * TEMPSIZE * TEMPSIZE);
-    (*rows) = (char **) malloc(sizeof(char *) * COLUMNS * TEMPSIZE * TEMPSIZE);
-    (*cells) = (char *) malloc(COLUMNS * TEMPSIZE * TEMPSIZE);
+    table->table = (char ***) malloc(sizeof(char **) * TEMPSIZE * TEMPSIZE);
+    table->rows = (char **) malloc(sizeof(char *) * COLUMNS * TEMPSIZE * TEMPSIZE);
+    table->cells = (char *) malloc(COLUMNS * TEMPSIZE * TEMPSIZE);
     
     unsigned int numRows = 0;
-    char * i = (*cells);
-    char ** j = (*rows);
+    char * i = table->cells;
+    char ** j = table->rows;
     
     FILE * csvFile = fopen(csvPath, "r");
     
     while(fgets(i, TEMPSIZE, csvFile) != NULL) {
         
-        (*table)[numRows] = j;
+        table->table[numRows] = j;
         
         unsigned long next = strlen(i) + 1;
         
         int goodRow = 0;
         
         if (!numRows) {
-            goodRow = tokenizeRow(i, (*table)[numRows], 1);
+            goodRow = tokenizeRow(i, table->table[numRows], 1);
         } else {
-            goodRow = tokenizeRow(i, (*table)[numRows], 0);
+            goodRow = tokenizeRow(i, table->table[numRows], 0);
         }
         
         if (goodRow) {
@@ -251,9 +251,7 @@ unsigned int fillTable(const char * csvPath, char * *** table, char * ** rows, c
         } else if (!numRows) {
             
             fclose(csvFile);
-            free((*table));
-            free((*rows));
-            free((*cells));
+            freeTable(*table);
             return 0;
             
         }
@@ -261,11 +259,15 @@ unsigned int fillTable(const char * csvPath, char * *** table, char * ** rows, c
     
     fclose(csvFile);
     
-//    (*table) = (char ***) realloc((*table), sizeof(char **) * numRows);
-//    (*rows) = (char **) realloc((*rows), j - (*rows));
-//    (*cells) = (char *) realloc((*cells), i - (*cells));
+//    table->table = (char ***) realloc(table->table, sizeof(char **) * numRows);
+//    table->rows = (char **) realloc(table->rows, j - table->rows);
+//    table->cells = (char *) realloc(table->cells, i - table->cells);
     
-    return numRows;
+    table->numRows = numRows;
+    table->cellsSize = i - table->cells;
+//    reAllocTable(table);
+    
+    return 1;
 }
 
 // Prints <table> with <rows> rowscolumns in a csv
