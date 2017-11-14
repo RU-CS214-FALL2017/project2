@@ -1,7 +1,7 @@
 #ifndef forkTools_h
 #define forkTools_h
 
-#define TEMPSIZE 4096
+
 
 #include "memTools.h"
 
