@@ -262,7 +262,7 @@ unsigned int fillTable(const char * csvPath, char * *** table, char * ** rows, c
     fclose(csvFile);
     
     (*table) = (char ***) realloc((*table), sizeof(char **) * numRows);
-    (*rows) = realloc((*rows), j - (*rows));
+    (*rows) = (char **) realloc((*rows), j - (*rows));
     (*cells) = (char *) realloc((*cells), i - (*cells));
     
     return numRows;
