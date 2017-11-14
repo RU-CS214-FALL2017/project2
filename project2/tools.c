@@ -256,6 +256,7 @@ unsigned int fillTable(const char * csvPath, char * *** table, char * * cells) {
             
             fclose(csvFile);
             free(*(*table));
+            free((*cells));
             return 0;
             
         } else {
