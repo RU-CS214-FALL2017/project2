@@ -214,8 +214,8 @@ void removeTrail(char * str) {
 // Fills pre-allocated <table> with data from <csvFile>. <cells> is a
 // pre-allocated memory that will be stored with strings of the cells.
 // Returns the number of successful rows in table, returns 0 if <csvFile>
-// is not a proper movie_metadata CSV. To free, free <table>[i], 0 < i <
-// return value.
+// is not a proper movie_metadata CSV. Reallocates <table> and <cells>.
+// To free, free <table>[i], 0 < i <return value.
 unsigned int fillTable(FILE * csvFile, char *** table, char * cells) {
     
     unsigned int rows = 0;
@@ -260,6 +260,9 @@ unsigned int fillTable(FILE * csvFile, char *** table, char * cells) {
     if(dontAlloc == 1) {
         free(table[rows]);
     }
+    
+    table = (char ***) realloc(table, sizeof(char **) * rows);
+    cells = (char *) realloc(cells, i - cells);
     
     return rows;
 }
