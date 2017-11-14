@@ -1,6 +1,7 @@
 #ifndef tools_h
 #define tools_h
 
+#define TEMPSIZE 4096
 #define COLUMNS 28
 
 #include <stdio.h>
@@ -16,6 +17,8 @@ struct threadParams {
     unsigned int sortIndex;
     int isNumeric;
 };
+
+extern const char * MovieHeaders[28];
 
 //struct row {
 //
@@ -50,6 +53,7 @@ struct threadParams {
 //};
 
 int tokenizeRow(char * line, char ** row);
+void removeTrail(char * str);
 void trim (char * str);
 void removeChars (char * str, unsigned long startIndex, unsigned long endIndex);
 unsigned int fillTable(FILE * csvFile, char *** table, char * lines);
