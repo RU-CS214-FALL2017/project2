@@ -15,6 +15,7 @@
 int findCsvFilesHelper(const char * dirPath, char ** csvPaths, int * numFound);
 void printDirTreeHelper(FILE * output, pid_t pid, struct sharedMem * sharedMem, unsigned int level);
 
+// Headers of a proper movie_metadata CSV.
 const char * MovieHeaders[28] = {
     
     "color",
@@ -49,7 +50,8 @@ const char * MovieHeaders[28] = {
 
 // Tokenizes a CSV row into the pre-allocated <row>. <line> is the
 // pre-allocated CSV line/row to tokenize. Returns 1 if 27 cells
-// have been tokenized, otherwise returns 0.
+// have been tokenized, otherwise returns 0. If <isHeader> is non-zero,
+// then returns 1 if the headers match the movie_metadata headers.
 int tokenizeRow(char * line, char ** row, int isHeader) {
     
     int rc = 0;
@@ -160,6 +162,7 @@ int tokenizeRow(char * line, char ** row, int isHeader) {
 //    row->movie_facebook_likes = atof(charRow[27]);
 }
 
+// Removes trailing whitespaces from <str>.
 void removeTrail(char * str) {
     
     unsigned long i = strlen(str);
@@ -210,8 +213,9 @@ void removeTrail(char * str) {
 
 // Fills pre-allocated <table> with data from <csvFile>. <cells> is a
 // pre-allocated memory that will be stored with strings of the cells.
-// Returns the number of rows in table. To free, free <table>[i], 0 <
-// i < return value.
+// Returns the number of successful rows in table, returns 0 if <csvFile>
+// is not a proper movie_metadata CSV. To free, free <table>[i], 0 < i <
+// return value.
 unsigned int fillTable(FILE * csvFile, char *** table, char * cells) {
     
     unsigned int rows = 0;
@@ -230,12 +234,22 @@ unsigned int fillTable(FILE * csvFile, char *** table, char * cells) {
         
         unsigned long next = strlen(i) + 1;
         
-        int goodRow = tokenizeRow(i, table[rows]);
+        int goodRow = 0;
+        
+        if (!rows) {
+            tokenizeRow(i, table[rows], 1);
+        } else {
+            tokenizeRow(i, table[rows], 0);
+        }
         
         if (goodRow) {
             
             rows++;
             i += next;
+            
+        } else if (!rows) {
+            
+            return 0;
             
         } else {
             dontAlloc = 1;
