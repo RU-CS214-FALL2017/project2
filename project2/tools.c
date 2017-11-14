@@ -15,6 +15,38 @@
 int findCsvFilesHelper(const char * dirPath, char ** csvPaths, int * numFound);
 void printDirTreeHelper(FILE * output, pid_t pid, struct sharedMem * sharedMem, unsigned int level);
 
+const char * MovieHeaders[28] = {
+    
+    "color",
+    "director_name",
+    "num_critic_for_reviews",
+    "duration",
+    "director_facebook_likes",
+    "actor_3_facebook_likes",
+    "actor_2_name",
+    "actor_1_facebook_likes",
+    "gross",
+    "genres",
+    "actor_1_name",
+    "movie_title",
+    "num_voted_users",
+    "cast_total_facebook_likes",
+    "actor_3_name",
+    "facenumber_in_poster",
+    "plot_keywords",
+    "movie_imdb_link",
+    "num_user_for_reviews",
+    "language",
+    "country",
+    "content_rating",
+    "budget",
+    "title_year",
+    "actor_2_facebook_likes",
+    "imdb_score",
+    "aspect_ratio",
+    "movie_facebook_likes"
+};
+
 // Tokenizes a CSV row into the pre-allocated <row>. <line> is the
 // pre-allocated CSV line/row to tokenize. Returns 1 if 27 cells
 // have been tokenized, otherwise returns 0.
@@ -33,6 +65,7 @@ int tokenizeRow(char * line, char ** row) {
                 
             *line = '\0';
             row[rc] = tempCell;
+            removeTrail(tempCell);
             rc++;
             beginCell = 1;
             
@@ -42,6 +75,7 @@ int tokenizeRow(char * line, char ** row) {
                 
                 *line = '\0';
                 row[rc] = tempCell;
+                removeTrail(tempCell);
                 rc++;
                 beginCell = 1;
                 
@@ -76,6 +110,7 @@ int tokenizeRow(char * line, char ** row) {
     }
     
     row[rc] = tempCell;
+    removeTrail(tempCell);
     
     if (rc == 27) {
         return 1;
@@ -113,26 +148,39 @@ int tokenizeRow(char * line, char ** row) {
 //    row->movie_facebook_likes = atof(charRow[27]);
 }
 
-//// Removes leading and trailing whitespaces from <str>.
+void removeTrail(char * str) {
+    
+    unsigned long i = strlen(str);
+    i--;
+    
+    while (str[i] == ' ' || str[i] == '\n' || str[i] == '\t' || str[i] == '\r' || str[i] == '\v'
+           || str[i] == '\f') {
+        i--;
+    }
+    
+    str[i+1] = '\0';
+}
+
+// Removes leading and trailing whitespaces from <str>.
 //void trim (char * str) {
-//    
+//
 //    int i = 0;
-//    
+//
 //    while(str[i] == ' ' || str[i] == '\n' || str[i] == '\t' || str[i] == '\r' || str[i] == '\v'
 //          || str[i] == '\f') {
 //        i += 1;
 //    }
-//    
+//
 //    removeChars(str, 0, i);
-//    
+//
 //    unsigned long terminatingIndex = strlen(str);
 //    unsigned long j = terminatingIndex - 1;
-//    
+//
 //    while(str[j] == ' ' || str[j] == '\n' || str[j] == '\t' || str[j] == '\r' || str[j] == '\v'
 //          || str[j] == '\f') {
 //        j -= 1;
 //    }
-//    
+//
 //    removeChars(str, j + 1, terminatingIndex);
 //}
 
