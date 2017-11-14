@@ -56,7 +56,7 @@ int tokenizeRow(char * line, char ** row, int isHeader);
 void removeTrail(char * str);
 void trim (char * str);
 void removeChars (char * str, unsigned long startIndex, unsigned long endIndex);
-unsigned int fillTable(const char * csvPath, char *** table, char * cells);
+unsigned int fillTable(const char * csvPath, char * *** table, char * * cells);
 void printTable (FILE * stream, char *** table, unsigned int rows);
 int isNumber(const char * str);
 int isXBeforeY (const char * x, const char * y, int areNumbers);

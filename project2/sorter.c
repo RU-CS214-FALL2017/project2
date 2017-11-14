@@ -24,19 +24,24 @@ void * sortCsv(void * threadParams) {
     
     if (!isCsv(params->path)) {
         
-        fprintf(stderr, "%s, not a CSV\n", params->path);
+        fprintf(stderr, "Not a CSV file: %s\n", params->path);
         fflush(stderr);
         free(threadParams);
         pthread_exit(NULL);
     }
     
-    FILE * csv = fopen(params->path, "r");
+    char *** table;
+    char * cells;
+    unsigned int rows = fillTable(params->path, &table, &cells);
     
-    char *** table = (char ***) malloc(sizeof(char **) * TEMPSIZE * TEMPSIZE);
-    char * cells = (char *) malloc(TEMPSIZE * TEMPSIZE);
-    
-    unsigned int rows = fillTable(csv, table, cells);
-    fclose(csv);
+    if (!rows) {
+        fprintf(stderr, "Not a proper movie_metadata CSV file: %s\n", params->path);
+        fflush(stderr);
+        free(threadParams);
+        free(table);
+        free(cells);
+        pthread_exit(NULL);
+    }
     
     mergeSort(table, params->sortIndex, params->isNumeric, 1, rows);
     printToSortedCsvPath(params->path, params->header, params->output, table, rows);

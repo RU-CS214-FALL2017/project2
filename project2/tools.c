@@ -211,19 +211,22 @@ void removeTrail(char * str) {
 //    }
 //}
 
-// Fills pre-allocated <table> with data from <csvPath>. <cells> is a
-// pre-allocated memory that will be stored with strings of the cells.
+// Fills newly-allocated *<table> with data from <csvPath>. *<cells> is a
+// newly-allocated memory that will be stored with strings of the cells.
 // Returns the number of successful rows in table, returns 0 if <csvFile>
 // is not a proper movie_metadata CSV. Reallocates <table> and <cells>.
 // To free, free <table>[i], 0 < i <return value.
-unsigned int fillTable(const char * csvPath, char *** table, char * cells) {
+unsigned int fillTable(const char * csvPath, char * *** table, char * * cells) {
     
-    FILE * csvFile = fopen(csvPath, "r");
+    (*table) = (char ***) malloc(sizeof(char **) * TEMPSIZE * TEMPSIZE);
+    (*cells) = (char *) malloc(TEMPSIZE * TEMPSIZE);
     
     unsigned int rows = 0;
-    char * i = cells;
+    char * i = (*cells);
     
     int dontAlloc = 0;
+    
+    FILE * csvFile = fopen(csvPath, "r");
     
     while(fgets(i, TEMPSIZE, csvFile) != NULL) {
         
@@ -231,7 +234,7 @@ unsigned int fillTable(const char * csvPath, char *** table, char * cells) {
             dontAlloc = 0;
             
         } else {
-            table[rows] = (char **) malloc(sizeof(char *) * COLUMNS);
+            (*table)[rows] = (char **) malloc(sizeof(char *) * COLUMNS);
         }
         
         unsigned long next = strlen(i) + 1;
@@ -239,9 +242,9 @@ unsigned int fillTable(const char * csvPath, char *** table, char * cells) {
         int goodRow = 0;
         
         if (!rows) {
-            tokenizeRow(i, table[rows], 1);
+            goodRow = tokenizeRow(i, (*table)[rows], 1);
         } else {
-            tokenizeRow(i, table[rows], 0);
+            goodRow = tokenizeRow(i, (*table)[rows], 0);
         }
         
         if (goodRow) {
@@ -252,6 +255,7 @@ unsigned int fillTable(const char * csvPath, char *** table, char * cells) {
         } else if (!rows) {
             
             fclose(csvFile);
+            free(*(*table));
             return 0;
             
         } else {
@@ -261,13 +265,13 @@ unsigned int fillTable(const char * csvPath, char *** table, char * cells) {
     }
     
     if(dontAlloc == 1) {
-        free(table[rows]);
+        free((*table)[rows]);
     }
     
     fclose(csvFile);
     
-    table = (char ***) realloc(table, sizeof(char **) * rows);
-    cells = (char *) realloc(cells, i - cells);
+    (*table) = (char ***) realloc((*table), sizeof(char **) * rows);
+    (*cells) = (char *) realloc((*cells), i - (*cells));
     
     return rows;
 }

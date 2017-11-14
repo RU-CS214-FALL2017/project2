@@ -21,7 +21,6 @@ int main(int argc, char ** argv) {
     params->isNumeric = 0;
     params->output = "out";
     params->sortIndex = 11;
-//    params.path = (char *) malloc(3);
     sprintf(params->path, "in");
     
     pthread_t kid;
