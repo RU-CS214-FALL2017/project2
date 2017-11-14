@@ -52,7 +52,7 @@ extern const char * MovieHeaders[28];
 //    double movie_facebook_likes;
 //};
 
-int tokenizeRow(char * line, char ** row);
+int tokenizeRow(char * line, char ** row, int isHeader);
 void removeTrail(char * str);
 void trim (char * str);
 void removeChars (char * str, unsigned long startIndex, unsigned long endIndex);

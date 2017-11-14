@@ -50,7 +50,7 @@ const char * MovieHeaders[28] = {
 // Tokenizes a CSV row into the pre-allocated <row>. <line> is the
 // pre-allocated CSV line/row to tokenize. Returns 1 if 27 cells
 // have been tokenized, otherwise returns 0.
-int tokenizeRow(char * line, char ** row) {
+int tokenizeRow(char * line, char ** row, int isHeader) {
     
     int rc = 0;
     char * tempCell = line;
@@ -66,6 +66,9 @@ int tokenizeRow(char * line, char ** row) {
             *line = '\0';
             row[rc] = tempCell;
             removeTrail(tempCell);
+            if (isHeader && strcmp(tempCell, MovieHeaders[rc])) {
+                return 0;
+            }
             rc++;
             beginCell = 1;
             
@@ -76,6 +79,9 @@ int tokenizeRow(char * line, char ** row) {
                 *line = '\0';
                 row[rc] = tempCell;
                 removeTrail(tempCell);
+                if (isHeader && strcmp(tempCell, MovieHeaders[rc])) {
+                    return 0;
+                }
                 rc++;
                 beginCell = 1;
                 
@@ -96,6 +102,9 @@ int tokenizeRow(char * line, char ** row) {
                     
                     *line = '\0';
                     row[rc] = line;
+                    if (isHeader && strcmp(line, MovieHeaders[rc])) {
+                        return 0;
+                    }
                     rc++;
                 }
                 
@@ -111,6 +120,9 @@ int tokenizeRow(char * line, char ** row) {
     
     row[rc] = tempCell;
     removeTrail(tempCell);
+    if (isHeader && strcmp(tempCell, MovieHeaders[rc])) {
+        return 0;
+    }
     
     if (rc == 27) {
         return 1;
