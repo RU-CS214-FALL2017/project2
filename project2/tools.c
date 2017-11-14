@@ -220,7 +220,7 @@ unsigned int fillTable(const char * csvPath, char * *** table, char * ** rows, c
     
     (*table) = (char ***) malloc(sizeof(char **) * TEMPSIZE * TEMPSIZE);
     (*rows) = (char **) malloc(sizeof(char *) * COLUMNS * TEMPSIZE * TEMPSIZE);
-    (*cells) = (char *) malloc(TEMPSIZE * TEMPSIZE);
+    (*cells) = (char *) malloc(COLUMNS * TEMPSIZE * TEMPSIZE);
     
     unsigned int numRows = 0;
     char * i = (*cells);
@@ -261,9 +261,9 @@ unsigned int fillTable(const char * csvPath, char * *** table, char * ** rows, c
     
     fclose(csvFile);
     
-    (*table) = (char ***) realloc((*table), sizeof(char **) * numRows);
-    (*rows) = (char **) realloc((*rows), j - (*rows));
-    (*cells) = (char *) realloc((*cells), i - (*cells));
+//    (*table) = (char ***) realloc((*table), sizeof(char **) * numRows);
+//    (*rows) = (char **) realloc((*rows), j - (*rows));
+//    (*cells) = (char *) realloc((*cells), i - (*cells));
     
     return numRows;
 }
