@@ -4,7 +4,7 @@
 #include <unistd.h>
 #include <pthread.h>
 
-#include "tools.h"
+//#include "tools.h"
 #include "sorter.h"
 #include "memTools.h"
 
@@ -184,3 +184,126 @@ void merge(char *** table, unsigned int columnIndex, int isNumeric, unsigned int
         s++;
     }
 }
+
+void * mergeTables(void * parameters) {
+
+    struct mergeTablesParams * params = (struct mergeTablesParams *) parameters;
+    
+    if (params->numTables == 1) {
+        pthread_exit(params->tables);
+        
+    } else if (params->numTables == 2) {
+        
+        struct table * ftable = *(params->tables);
+        struct table * stable = *(params->tables + 1);
+        struct table * table = malloc(sizeof(struct table));
+        table->table = malloc(sizeof(char **) * (ftable->numRows + stable->numRows));
+        
+        free(params->tables);
+        
+        unsigned int fc = 0;
+        unsigned int sc = 0;
+        unsigned int tc = 0;
+        
+        while (fc < ftable->numRows && sc < stable->numRows) {
+            
+            if (isXBeforeY(ftable->table[fc][params->sortIndex], stable->table[sc][params->sortIndex], params->isNumeric)) {
+                
+                table->table[tc] = ftable->table[fc];
+                fc++;
+                
+            } else {
+                
+                table->table[tc] = stable->table[sc];
+                sc++;
+            }
+            
+            tc++;
+        }
+        
+        while (fc < ftable->numRows) {
+            
+            table->table[tc] = ftable->table[fc];
+            fc++;
+            tc++;
+        }
+        
+        while (sc < stable->numRows) {
+            
+            table->table[tc] = stable->table[sc];
+            sc++;
+            tc++;
+        }
+        
+        free(ftable->table);
+        free(stable->table);
+        
+        table->rowsMems = malloc(sizeof(char *) * (ftable->numRowsMems + stable->numRowsMems));
+        unsigned int trmc = 0;
+        for (int i = 0; i < ftable->numRowsMems; i++) {
+            table->rowsMems[trmc] = ftable->rowsMems[i];
+            trmc++;
+        }
+        for (int i = 0; i < stable->numRowsMems; i++) {
+            table->rowsMems[trmc] = stable->rowsMems[i];
+            trmc++;
+        }
+        table->numRowsMems = trmc;
+        free(ftable->rowsMems);
+        free(stable->rowsMems);
+        
+        table->cellsMems = malloc(sizeof(char *) * (ftable->numCellsMems + stable->numCellsMems));
+        unsigned int tcmc = 0;
+        for (int i = 0; i < ftable->numCellsMems; i++) {
+            table->cellsMems[tcmc] = ftable->cellsMems[i];
+            tcmc++;
+        }
+        for (int i = 0; i < stable->numRows; i++) {
+            table->cellsMems[tcmc] = stable->cellsMems[i];
+            tcmc++;
+        }
+        table->numCellsMems = tcmc;
+        free(ftable->cellsMems);
+        free(stable->cellsMems);
+        
+        pthread_exit(table);
+        
+    } else {
+        
+        unsigned int mid = params->numTables / 2;
+        
+        struct mergeTablesParams fparam;
+        fparam.isNumeric = params->isNumeric;
+        fparam.numTables = mid;
+        fparam.sortIndex = params->sortIndex;
+        fparam.tables = params->tables;
+        
+        struct mergeTablesParams sparam;
+        sparam.isNumeric = params->isNumeric;
+        sparam.numTables = params->numTables - mid;
+        sparam.sortIndex = params->sortIndex;
+        sparam.tables = params->tables + mid;
+        
+        pthread_t threads[2];
+        pthread_create(&threads[0], NULL, mergeTables, &fparam);
+        pthread_create(&threads[1], NULL, mergeTables, &sparam);
+        void * fret;
+        void * sret;
+        pthread_join(threads[0], &fret);
+        pthread_join(threads[1], &sret);
+        
+        struct table * ftable = fret;
+        struct table * stable = sret;
+        
+        struct mergeTablesParams mergeParams;
+        mergeParams.isNumeric = params->isNumeric;
+        mergeParams.numTables = 2;
+        mergeParams.tables = malloc(sizeof(struct table *) * 2);
+        mergeParams.tables[0] = ftable;
+        mergeParams.tables[1] = stable;
+        
+        mergeTables(&mergeParams);
+        return 0;
+    }
+}
+

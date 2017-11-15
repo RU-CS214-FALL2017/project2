@@ -219,12 +219,12 @@ void removeTrail(char * str) {
 int fillTable(const char * csvPath, struct table * table) {
     
     table->table = (char ***) malloc(sizeof(char **) * TEMPSIZE * TEMPSIZE);
-    table->rows = (char **) malloc(sizeof(char *) * COLUMNS * TEMPSIZE * TEMPSIZE);
-    table->cells = (char *) malloc(COLUMNS * TEMPSIZE * TEMPSIZE);
+    (*(table->rowsMem)) = (char **) malloc(sizeof(char *) * COLUMNS * TEMPSIZE * TEMPSIZE);
+    (*(table->cellsMem)) = (char *) malloc(COLUMNS * TEMPSIZE * TEMPSIZE);
     
     unsigned int numRows = 0;
-    char * i = table->cells;
-    char ** j = table->rows;
+    char * i = (*(table->cellsMem));
+    char ** j = (*(table->rowsMem));
     
     FILE * csvFile = fopen(csvPath, "r");
     
@@ -259,12 +259,10 @@ int fillTable(const char * csvPath, struct table * table) {
     
     fclose(csvFile);
     
-//    table->table = (char ***) realloc(table->table, sizeof(char **) * numRows);
-//    table->rows = (char **) realloc(table->rows, j - table->rows);
-//    table->cells = (char *) realloc(table->cells, i - table->cells);
-    
     table->numRows = numRows;
-    table->cellsSize = i - table->cells;
+    table->numRowsMem = 1;
+    table->numCellsMem = 1;
+//    table->cellsSize = i - (*(table->cellsMem));
 //    reAllocTable(table);
     
     return 1;

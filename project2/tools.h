@@ -12,10 +12,12 @@
 struct table {
   
     char *** table;
-    char ** rows;
-    char * cells;
-    size_t cellsSize;
+    char * ** rowsMems;
+    char * * cellsMems;
+//    size_t * cellsMemSize;
     unsigned int numRows;
+    unsigned int numRowsMems;
+    unsigned int numCellsMems;
 };
 
 struct threadParams {
