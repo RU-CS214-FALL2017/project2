@@ -307,3 +307,13 @@ void * mergeTables(void * parameters) {
     }
 }
 
+unsigned int count = 0;
+pthread_mutex_t m;
+struct table * * tables;
+
+//void addTable(struct table * table) {
+//    
+//    mutex
+//}
+
+
