@@ -22,43 +22,43 @@
 
 void freeTable(struct table table) {
     
-    free(table.cells);
-    free(table.rows);
+    free(table.cellsMems);
+    free(table.rowsMems);
     free(table.table);
 }
 
-void reAllocTable(struct table * table) {
-    
-    char ** oldRows = table->rows;
-    char * oldCells = table->cells;
-    
-    table->cells = (char *) realloc(oldCells, table->cellsSize);
-    
-    if (table->cells != oldCells) {
-        
-        long difference = oldCells - table->cells;
-        
-        for (char ** i = oldRows; i < oldRows + (table->numRows * sizeof(char *) * COLUMNS); i += sizeof(char *) * COLUMNS) {
-            
-            for (int j = 0; j < COLUMNS; j++) {
-                i[j] -= difference;
-            }
-        }
-    }
-    
-    table->rows = (char **) realloc(oldRows, sizeof(char *) * COLUMNS * table->numRows);
-    
-    if (table->rows != oldRows) {
-        
-        long difference = oldRows - table->rows;
-        
-        for (int i = 0; i < table->numRows; i++) {
-            table->table[i] -= difference;
-        }
-    }
-    
-    table->table = (char ***) realloc(table->table, sizeof(char **) * table->numRows);
-}
+//void reAllocTable(struct table * table) {
+//
+//    char ** oldRows = table->rows;
+//    char * oldCells = table->cells;
+//
+//    table->cells = (char *) realloc(oldCells, table->cellsSize);
+//
+//    if (table->cells != oldCells) {
+//
+//        long difference = oldCells - table->cells;
+//
+//        for (char ** i = oldRows; i < oldRows + (table->numRows * sizeof(char *) * COLUMNS); i += sizeof(char *) * COLUMNS) {
+//
+//            for (int j = 0; j < COLUMNS; j++) {
+//                i[j] -= difference;
+//            }
+//        }
+//    }
+//
+//    table->rows = (char **) realloc(oldRows, sizeof(char *) * COLUMNS * table->numRows);
+//
+//    if (table->rows != oldRows) {
+//
+//        long difference = oldRows - table->rows;
+//
+//        for (int i = 0; i < table->numRows; i++) {
+//            table->table[i] -= difference;
+//        }
+//    }
+//
+//    table->table = (char ***) realloc(table->table, sizeof(char **) * table->numRows);
+//}
 
 //// Frees <alloc>[i] (0 <= i < <x>) and <alloc>.
 //void doubleFree(char ** alloc, int x) {

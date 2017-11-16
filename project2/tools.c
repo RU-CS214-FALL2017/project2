@@ -218,13 +218,19 @@ void removeTrail(char * str) {
 // To free, free <table>[i], 0 < i <return value.
 int fillTable(const char * csvPath, struct table * table) {
     
+    table->numRowsMems = 1;
+    table->numCellsMems = 1;
+    table->rowsMems = malloc(sizeof(char **));
+    table->cellsMems = malloc(sizeof(char *));
+    
+    
     table->table = (char ***) malloc(sizeof(char **) * TEMPSIZE * TEMPSIZE);
-    (*(table->rowsMem)) = (char **) malloc(sizeof(char *) * COLUMNS * TEMPSIZE * TEMPSIZE);
-    (*(table->cellsMem)) = (char *) malloc(COLUMNS * TEMPSIZE * TEMPSIZE);
+    (*(table->rowsMems)) = (char **) malloc(sizeof(char *) * COLUMNS * TEMPSIZE * TEMPSIZE);
+    (*(table->cellsMems)) = (char *) malloc(COLUMNS * TEMPSIZE * TEMPSIZE);
     
     unsigned int numRows = 0;
-    char * i = (*(table->cellsMem));
-    char ** j = (*(table->rowsMem));
+    char * i = (*(table->cellsMems));
+    char ** j = (*(table->rowsMems));
     
     FILE * csvFile = fopen(csvPath, "r");
     
@@ -260,8 +266,6 @@ int fillTable(const char * csvPath, struct table * table) {
     fclose(csvFile);
     
     table->numRows = numRows;
-    table->numRowsMem = 1;
-    table->numCellsMem = 1;
 //    table->cellsSize = i - (*(table->cellsMem));
 //    reAllocTable(table);
     
