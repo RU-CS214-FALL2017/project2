@@ -8,7 +8,7 @@ sorter: $(allFiles)
 	gcc $(flags) $(sourceFiles) -o sorter
 
 gpusorter: $(allFiles)
-	$(nvcc) $(flags) $(sourceFiles) -o gpusorter
+	$(nvcc) -Xcompiler -std=gnu11,-Wall,-pthread $(sourceFiles) -o gpusorter
 
 debug: $(allFiles)
 	gcc $(flags) -g $(sourceFiles) -o debugsorter
