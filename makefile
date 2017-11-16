@@ -11,4 +11,4 @@ gpusorter: $(allFiles)
 	$(nvcc) $(flags) $(sourceFiles) -o gpusorter
 
 debug: $(allFiles)
-	gcc $(flags) -g $(sourceFiles) -o debugSorter
+	gcc $(flags) -g $(sourceFiles) -o debugsorter
