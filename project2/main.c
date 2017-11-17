@@ -12,7 +12,7 @@
 #include <pthread.h>
 #include <stdlib.h>
 
-#include "tools.h"
+#include "sorter.h"
 
 int main(int argc, char ** argv) {
     
@@ -23,11 +23,29 @@ int main(int argc, char ** argv) {
     params->sortIndex = 11;
     sprintf(params->path, "in");
     
-    pthread_t kid;
+    pthread_mutex_init(&m, NULL);
+    tables = malloc(sizeof(struct table *) * TEMPSIZE);
     
+    pthread_t kid;
     pthread_create(&kid, NULL, processCsvDir, params);
     
+    struct mergeTablesParams * params2 = malloc(sizeof(struct mergeTablesParams));
+    params2->isNumeric = 0;
+    params2->numTables = tc;
+    params2->sortIndex = 11;
+    params2->tables = tables;
+    
+    pthread_t kid2;
+    void * ret;
+    
     pthread_join(kid, NULL);
+    
+    pthread_create(&kid2, NULL, mergeTables, params2);
+    pthread_join(kid2, &ret);
+    struct table * retTable = ret;
+    
+    printToSortedCsvPath("in/all.csv", "movie_title", "out", retTable->table, retTable->numRows);
+    
     
     printf("done\n");
 

@@ -3,6 +3,10 @@
 
 #include "tools.h"
 
+extern pthread_mutex_t m;
+extern struct table * * tables;
+extern unsigned int tc;
+
 struct mergeTablesParams {
     
     struct table ** tables;

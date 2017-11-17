@@ -8,6 +8,20 @@
 #include "sorter.h"
 #include "memTools.h"
 
+pthread_mutex_t m;
+struct table * * tables;
+unsigned int tc = 0;
+
+void addTable(struct table * table) {
+    
+    pthread_mutex_lock(&m);
+    
+    tables[tc] = table;
+    tc++;
+    
+    pthread_mutex_unlock(&m);
+}
+
 //void sortByHeaders(const char * csvPath, const char * columnHeaders, char *** table,
 //                   const unsigned int rows, const unsigned int columns, struct sharedMem * sharedMem);
 //void cascadeSort(char *** table, unsigned int rows, unsigned int start,
@@ -30,9 +44,9 @@ void * sortCsv(void * threadParams) {
         pthread_exit(NULL);
     }
     
-    struct table table;
+    struct table * table = malloc(sizeof(struct table));
     
-    if (!fillTable(params->path, &table)) {
+    if (!fillTable(params->path, table)) {
         
         fprintf(stderr, "Not a proper movie_metadata CSV file: %s\n", params->path);
         fflush(stderr);
@@ -40,13 +54,15 @@ void * sortCsv(void * threadParams) {
         pthread_exit(NULL);
     }
     
-    mergeSort(table.table, params->sortIndex, params->isNumeric, 1, table.numRows);
-    printToSortedCsvPath(params->path, params->header, params->output, table.table, table.numRows);
+    mergeSort(table->table, params->sortIndex, params->isNumeric, 1, table->numRows);
+    printToSortedCsvPath(params->path, params->header, params->output, table->table, table->numRows);
     
-    freeTable(table);
+    addTable(table);
     
-    printf("sorted, %s\n", params->path);
-    fflush(stdout);
+//    freeTable(table);
+//
+//    printf("sorted, %s\n", params->path);
+//    fflush(stdout);
     
     free(threadParams);
     pthread_exit(NULL);
@@ -306,14 +322,5 @@ void * mergeTables(void * parameters) {
         return 0;
     }
 }
-
-unsigned int count = 0;
-pthread_mutex_t m;
-struct table * * tables;
-
-//void addTable(struct table * table) {
-//    
-//    mutex
-//}
 
 
