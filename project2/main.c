@@ -11,6 +11,7 @@
 //#include <stdio.h>
 #include <pthread.h>
 #include <stdlib.h>
+#include <semaphore.h>
 
 #include "sorter.h"
 
@@ -30,6 +31,8 @@ int main(int argc, char ** argv) {
     
 //    pthread_mutex_init(&m, NULL);
 //    tables = malloc(sizeof(struct table *) * TEMPSIZE);
+    
+    sem_init(&S, 0, 2);
     
     pthread_t kid;
     pthread_create(&kid, NULL, processCsvDir, params);
