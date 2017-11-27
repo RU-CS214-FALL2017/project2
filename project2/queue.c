@@ -11,7 +11,7 @@ struct node * tail;
 
 unsigned int elements = 0;
 
-struct table * pop() {
+struct table * popTable() {
     
     pthread_mutex_lock(&m);
     
@@ -28,7 +28,7 @@ struct table * pop() {
     return ret;
 }
 
-void push(struct table * table) {
+void pushTable(struct table * table) {
     
     struct node * newNode = (struct node *) malloc(sizeof(struct node));
     newNode->table = table;

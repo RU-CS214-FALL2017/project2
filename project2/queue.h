@@ -11,4 +11,7 @@ struct node {
     struct node * next;
 };
 
+struct table * popTable();
+void pushTable(struct table * table);
+
 #endif /* queue_h */
