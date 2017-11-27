@@ -23,10 +23,7 @@ struct table {
 struct threadParams {
     
     char path[TEMPSIZE];
-    char * header;
     char * output;
-    unsigned int sortIndex;
-    int isNumeric;
 };
 
 extern const char * MovieHeaders[28];
@@ -70,12 +67,12 @@ void removeChars (char * str, unsigned long startIndex, unsigned long endIndex);
 int fillTable(const char * csvPath, struct table * table);
 void printTable (FILE * stream, char *** table, unsigned int rows);
 int isNumber(const char * str);
-int isXBeforeY (const char * x, const char * y, int areNumbers);
+int isXBeforeY (const char * x, const char * y);
 int isNumericColumn(char *** table, int rows, int columnIndex);
 int findCsvFiles(const char * dirPath, char * ** csvPaths, int * numFound);
 int isCsv(const char * csvPath);
 unsigned int lineageParser(const char * path, char * ** lineage);
-void printToSortedCsvPath(const char * csvPath, const char * columnHeader, const char * outputDir, char *** table, unsigned int rows);
+void printToSortedCsvPath(const char * csvPath, char *** table, unsigned int rows);
 int getColumnHeaderIndex(const char * columnHeader,
                          char *** table, const unsigned int columns);
 //void printDirTree(FILE * output, struct sharedMem * sharedMem);

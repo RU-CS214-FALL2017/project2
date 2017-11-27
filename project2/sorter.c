@@ -8,26 +8,34 @@
 #include "sorter.h"
 #include "memTools.h"
 
-pthread_mutex_t m;
-struct table * * tables;
-unsigned int tc = 0;
+pthread_mutex_t M;
+int CsvCounter = 0;
 
-void addTable(struct table * table) {
+char * Header;
+unsigned int SortIndex;
+int IsNumeric;
+char * OutputDir;
+
+void increment() {
     
-    pthread_mutex_lock(&m);
+    pthread_mutex_lock(&M);
+    CsvCounter++;
+    pthread_mutex_unlock(&M);
+}
+
+void decrement() {
     
-    tables[tc] = table;
-    tc++;
-    
-    pthread_mutex_unlock(&m);
+    pthread_mutex_lock(&M);
+    CsvCounter--;
+    pthread_mutex_unlock(&M);
 }
 
 //void sortByHeaders(const char * csvPath, const char * columnHeaders, char *** table,
 //                   const unsigned int rows, const unsigned int columns, struct sharedMem * sharedMem);
 //void cascadeSort(char *** table, unsigned int rows, unsigned int start,
 //                 const unsigned int end, const int * headers, const unsigned int numHeaders);
-void mergeSort(char *** table, unsigned int columnIndex, int isNumeric, unsigned int start, unsigned int end);
-void merge(char *** table, unsigned int columnIndex, int isNumeric, unsigned int start, unsigned int mid, unsigned int end);
+void mergeSort(char *** table, unsigned int start, unsigned int end);
+void merge(char *** table, unsigned int start, unsigned int mid, unsigned int end);
 
 // Sorts a the CSV file at <csvPath> in ascending order on the
 // column header <columnHeader> at index <sortIndex>. Saves the
@@ -41,6 +49,7 @@ void * sortCsv(void * threadParams) {
         fprintf(stderr, "Not a CSV file: %s\n", params->path);
         fflush(stderr);
         free(threadParams);
+        decrement();
         pthread_exit(NULL);
     }
     
@@ -51,13 +60,12 @@ void * sortCsv(void * threadParams) {
         fprintf(stderr, "Not a proper movie_metadata CSV file: %s\n", params->path);
         fflush(stderr);
         free(threadParams);
+        decrement();
         pthread_exit(NULL);
     }
     
-    mergeSort(table->table, params->sortIndex, params->isNumeric, 1, table->numRows);
-    printToSortedCsvPath(params->path, params->header, params->output, table->table, table->numRows);
-    
-    addTable(table);
+    mergeSort(table->table, 1, table->numRows);
+    printToSortedCsvPath(params->path, table->table, table->numRows);
     
 //    freeTable(table);
 //
@@ -136,16 +144,16 @@ void * sortCsv(void * threadParams) {
 // Ascendingly sorts <table> according to the column at index <columnIndex> from row at
 // index <start> to row at index <end> - 1. If areNumbers is set to 0, the sort
 // is done numerically otherwise it is done lexicographically.
-void mergeSort(char *** table, unsigned int columnIndex, int isNumeric, unsigned int start, unsigned int end) {
+void mergeSort(char *** table, unsigned int start, unsigned int end) {
     
     if ((end - start) > 1 ) {
         
         unsigned int mid = ((end - start) / 2) + start;
         
-        mergeSort(table, columnIndex, isNumeric, start, mid);
-        mergeSort(table, columnIndex, isNumeric, mid, end);
+        mergeSort(table, start, mid);
+        mergeSort(table, mid, end);
         
-        merge(table, columnIndex, isNumeric, start, mid, end);
+        merge(table, start, mid, end);
     }
 }
 
@@ -155,7 +163,7 @@ void mergeSort(char *** table, unsigned int columnIndex, int isNumeric, unsigned
 // merge, they are sorted ascendingly according to the column at index
 // <columnIndex>. If areNumbers is set to 0, the sort is done numerically
 // otherwise it is done lexicographically.
-void merge(char *** table, unsigned int columnIndex, int isNumeric, unsigned int start, unsigned int mid, unsigned int end) {
+void merge(char *** table, unsigned int start, unsigned int mid, unsigned int end) {
     
     char ** temp[end - start];
     unsigned int s = start;
@@ -164,7 +172,7 @@ void merge(char *** table, unsigned int columnIndex, int isNumeric, unsigned int
 
     while(s < mid && m < end) {
         
-        if(isXBeforeY(table[s][columnIndex], table[m][columnIndex], isNumeric)) {
+        if(isXBeforeY(table[s][SortIndex], table[m][SortIndex])) {
             
             temp[i] = (table)[s];
             s++;
@@ -201,126 +209,260 @@ void merge(char *** table, unsigned int columnIndex, int isNumeric, unsigned int
     }
 }
 
-void * mergeTables(void * parameters) {
-
-    struct mergeTablesParams * params = (struct mergeTablesParams *) parameters;
+void mergeTables(struct table * table, unsigned int sortIndex, int isNumeric) {
     
-    if (params->numTables == 1) {
-        pthread_exit(params->tables);
+    if (CsvCounter == 1) {
         
-    } else if (params->numTables == 2) {
         
-        struct table * ftable = *(params->tables);
-        struct table * stable = *(params->tables + 1);
-        struct table * table = malloc(sizeof(struct table));
-        table->table = malloc(sizeof(char **) * (ftable->numRows + stable->numRows));
-        
-        free(params->tables);
-        
-        unsigned int fc = 0;
-        unsigned int sc = 0;
-        unsigned int tc = 0;
-        
-        while (fc < ftable->numRows && sc < stable->numRows) {
-            
-            if (isXBeforeY(ftable->table[fc][params->sortIndex], stable->table[sc][params->sortIndex], params->isNumeric)) {
-                
-                table->table[tc] = ftable->table[fc];
-                fc++;
-                
-            } else {
-                
-                table->table[tc] = stable->table[sc];
-                sc++;
-            }
-            
-            tc++;
-        }
-        
-        while (fc < ftable->numRows) {
-            
-            table->table[tc] = ftable->table[fc];
-            fc++;
-            tc++;
-        }
-        
-        while (sc < stable->numRows) {
-            
-            table->table[tc] = stable->table[sc];
-            sc++;
-            tc++;
-        }
-        
-        free(ftable->table);
-        free(stable->table);
-        
-        table->rowsMems = malloc(sizeof(char *) * (ftable->numRowsMems + stable->numRowsMems));
-        unsigned int trmc = 0;
-        for (int i = 0; i < ftable->numRowsMems; i++) {
-            table->rowsMems[trmc] = ftable->rowsMems[i];
-            trmc++;
-        }
-        for (int i = 0; i < stable->numRowsMems; i++) {
-            table->rowsMems[trmc] = stable->rowsMems[i];
-            trmc++;
-        }
-        table->numRowsMems = trmc;
-        free(ftable->rowsMems);
-        free(stable->rowsMems);
-        
-        table->cellsMems = malloc(sizeof(char *) * (ftable->numCellsMems + stable->numCellsMems));
-        unsigned int tcmc = 0;
-        for (int i = 0; i < ftable->numCellsMems; i++) {
-            table->cellsMems[tcmc] = ftable->cellsMems[i];
-            tcmc++;
-        }
-        for (int i = 0; i < stable->numRows; i++) {
-            table->cellsMems[tcmc] = stable->cellsMems[i];
-            tcmc++;
-        }
-        table->numCellsMems = tcmc;
-        free(ftable->cellsMems);
-        free(stable->cellsMems);
-        
-        pthread_exit(table);
-        
-    } else {
-        
-        unsigned int mid = params->numTables / 2;
-        
-        struct mergeTablesParams fparam;
-        fparam.isNumeric = params->isNumeric;
-        fparam.numTables = mid;
-        fparam.sortIndex = params->sortIndex;
-        fparam.tables = params->tables;
-        
-        struct mergeTablesParams sparam;
-        sparam.isNumeric = params->isNumeric;
-        sparam.numTables = params->numTables - mid;
-        sparam.sortIndex = params->sortIndex;
-        sparam.tables = params->tables + mid;
-        
-        pthread_t threads[2];
-        pthread_create(&threads[0], NULL, mergeTables, &fparam);
-        pthread_create(&threads[1], NULL, mergeTables, &sparam);
-        void * fret;
-        void * sret;
-        pthread_join(threads[0], &fret);
-        pthread_join(threads[1], &sret);
-        
-        struct table * ftable = fret;
-        struct table * stable = sret;
-        
-        struct mergeTablesParams mergeParams;
-        mergeParams.isNumeric = params->isNumeric;
-        mergeParams.numTables = 2;
-        mergeParams.tables = malloc(sizeof(struct table *) * 2);
-        mergeParams.tables[0] = ftable;
-        mergeParams.tables[1] = stable;
-        
-        mergeTables(&mergeParams);
-        return 0;
     }
 }
+
+//struct table * mergeTables(struct table ** tables, unsigned int numTables, unsigned int sortIndex, int isNumeric) {
+//
+//    if (numTables == 1) {
+//        return *tables;
+//
+//    } else if (numTables == 2) {
+//
+//        struct table * ftable = *(tables);
+//        struct table * stable = *(tables + 1);
+//        struct table * table = (struct table *) malloc(sizeof(struct table));
+//        table->table = (char ***) malloc(sizeof(char **) * (ftable->numRows + stable->numRows));
+//
+//        //        free(params->tables);
+//
+//        unsigned int fc = 0;
+//        unsigned int sc = 0;
+//        unsigned int tc = 0;
+//
+//        while (fc < ftable->numRows && sc < stable->numRows) {
+//
+//            if (isXBeforeY(ftable->table[fc][sortIndex], stable->table[sc][sortIndex], isNumeric)) {
+//
+//                table->table[tc] = ftable->table[fc];
+//                fc++;
+//
+//            } else {
+//
+//                table->table[tc] = stable->table[sc];
+//                sc++;
+//            }
+//
+//            tc++;
+//        }
+//
+//        while (fc < ftable->numRows) {
+//
+//            table->table[tc] = ftable->table[fc];
+//            fc++;
+//            tc++;
+//        }
+//
+//        while (sc < stable->numRows) {
+//
+//            table->table[tc] = stable->table[sc];
+//            sc++;
+//            tc++;
+//        }
+//
+////        free(ftable->table);
+////        free(stable->table);
+//
+//        table->rowsMems = (char * **) malloc(sizeof(char **) * (ftable->numRowsMems + stable->numRowsMems));
+//        unsigned int trmc = 0;
+//        for (int i = 0; i < ftable->numRowsMems; i++) {
+//            table->rowsMems[trmc] = ftable->rowsMems[i];
+//            trmc++;
+//        }
+//        for (int i = 0; i < stable->numRowsMems; i++) {
+//            table->rowsMems[trmc] = stable->rowsMems[i];
+//            trmc++;
+//        }
+//        table->numRowsMems = trmc;
+////        free(ftable->rowsMems);
+////        free(stable->rowsMems);
+//
+//        table->cellsMems = (char * *) malloc(sizeof(char *) * (ftable->numCellsMems + stable->numCellsMems));
+//        unsigned int tcmc = 0;
+//        for (int i = 0; i < ftable->numCellsMems; i++) {
+//            table->cellsMems[tcmc] = ftable->cellsMems[i];
+//            tcmc++;
+//        }
+//        for (int i = 0; i < stable->numCellsMems; i++) {
+//            table->cellsMems[tcmc] = stable->cellsMems[i];
+//            tcmc++;
+//        }
+//        table->numCellsMems = tcmc;
+////        free(ftable->cellsMems);
+////        free(stable->cellsMems);
+//
+//        return table;
+//
+//    } else {
+//
+//        unsigned int mid = numTables / 2;
+//
+//        struct mergeTablesParams * fparam = malloc(sizeof(struct mergeTablesParams));
+//        fparam->isNumeric = isNumeric;
+//        fparam->numTables = mid;
+//        fparam->sortIndex = sortIndex;
+//        fparam->tables = tables;
+//
+//        struct mergeTablesParams * sparam = malloc(sizeof(struct mergeTablesParams));
+//        sparam->isNumeric = isNumeric;
+//        sparam->numTables = numTables - mid;
+//        sparam->sortIndex = sortIndex;
+//        sparam->tables = tables + mid;
+//
+//        pthread_t threads[2];
+//        pthread_create(&threads[0], NULL, mergeTablesHelper, &fparam);
+//        pthread_create(&threads[1], NULL, mergeTablesHelper, &sparam);
+//        void * fret;
+//        void * sret;
+//        pthread_join(threads[0], &fret);
+//        pthread_join(threads[1], &sret);
+//
+//        struct table * ftable = fret;
+//        struct table * stable = sret;
+//
+//        unsigned int numTablesRet = 2;
+//        struct table ** tablesRet = malloc(sizeof(struct table *) * 2);
+//        tables[0] = ftable;
+//        tables[1] = stable;
+//
+//        return mergeTables(tablesRet, numTablesRet, sortIndex, isNumeric);
+//    }
+//}
+//
+//void * mergeTablesHelper(void * parameters) {
+//
+//    struct mergeTablesParams * params = parameters;
+//
+//    struct table * mergedTable = mergeTables(params->tables, params->numTables, params->sortIndex, params->isNumeric);
+//
+//    pthread_exit(mergedTable);
+//}
+
+//void * mergeTables(void * parameters) {
+//
+//    struct mergeTablesParams * params = (struct mergeTablesParams *) parameters;
+//
+//    if (params->numTables == 1) {
+//        pthread_exit(*(params->tables));
+//
+//    } else if (params->numTables == 2) {
+//
+//        struct table * ftable = *(params->tables);
+//        struct table * stable = *(params->tables + 1);
+//        struct table * table = malloc(sizeof(struct table));
+//        table->table = malloc(sizeof(char **) * (ftable->numRows + stable->numRows));
+//
+////        free(params->tables);
+//
+//        unsigned int fc = 0;
+//        unsigned int sc = 0;
+//        unsigned int tc = 0;
+//
+//        while (fc < ftable->numRows && sc < stable->numRows) {
+//
+//            if (isXBeforeY(ftable->table[fc][params->sortIndex], stable->table[sc][params->sortIndex], params->isNumeric)) {
+//
+//                table->table[tc] = ftable->table[fc];
+//                fc++;
+//
+//            } else {
+//
+//                table->table[tc] = stable->table[sc];
+//                sc++;
+//            }
+//
+//            tc++;
+//        }
+//
+//        while (fc < ftable->numRows) {
+//
+//            table->table[tc] = ftable->table[fc];
+//            fc++;
+//            tc++;
+//        }
+//
+//        while (sc < stable->numRows) {
+//
+//            table->table[tc] = stable->table[sc];
+//            sc++;
+//            tc++;
+//        }
+//
+//        free(ftable->table);
+//        free(stable->table);
+//
+//        table->rowsMems = malloc(sizeof(char *) * (ftable->numRowsMems + stable->numRowsMems));
+//        unsigned int trmc = 0;
+//        for (int i = 0; i < ftable->numRowsMems; i++) {
+//            table->rowsMems[trmc] = ftable->rowsMems[i];
+//            trmc++;
+//        }
+//        for (int i = 0; i < stable->numRowsMems; i++) {
+//            table->rowsMems[trmc] = stable->rowsMems[i];
+//            trmc++;
+//        }
+//        table->numRowsMems = trmc;
+//        free(ftable->rowsMems);
+//        free(stable->rowsMems);
+//
+//        table->cellsMems = malloc(sizeof(char *) * (ftable->numCellsMems + stable->numCellsMems));
+//        unsigned int tcmc = 0;
+//        for (int i = 0; i < ftable->numCellsMems; i++) {
+//            table->cellsMems[tcmc] = ftable->cellsMems[i];
+//            tcmc++;
+//        }
+//        for (int i = 0; i < stable->numCellsMems; i++) {
+//            table->cellsMems[tcmc] = stable->cellsMems[i];
+//            tcmc++;
+//        }
+//        table->numCellsMems = tcmc;
+//        free(ftable->cellsMems);
+//        free(stable->cellsMems);
+//
+//        pthread_exit(table);
+//
+//    } else {
+//
+//        unsigned int mid = params->numTables / 2;
+//
+//        struct mergeTablesParams * fparam = malloc(sizeof(struct mergeTablesParams));
+//        fparam->isNumeric = params->isNumeric;
+//        fparam->numTables = mid;
+//        fparam->sortIndex = params->sortIndex;
+//        fparam->tables = params->tables;
+//
+//        struct mergeTablesParams * sparam = malloc(sizeof(struct mergeTablesParams));
+//        sparam->isNumeric = params->isNumeric;
+//        sparam->numTables = params->numTables - mid;
+//        sparam->sortIndex = params->sortIndex;
+//        sparam->tables = params->tables + mid;
+//
+//        pthread_t threads[2];
+//        pthread_create(&threads[0], NULL, mergeTables, &fparam);
+//        pthread_create(&threads[1], NULL, mergeTables, &sparam);
+//        void * fret;
+//        void * sret;
+//        pthread_join(threads[0], &fret);
+//        pthread_join(threads[1], &sret);
+//
+//        struct table * ftable = fret;
+//        struct table * stable = sret;
+//
+//        struct mergeTablesParams mergeParams;
+//        mergeParams.isNumeric = params->isNumeric;
+//        mergeParams.numTables = 2;
+//        mergeParams.tables = malloc(sizeof(struct table *) * 2);
+//        mergeParams.tables[0] = ftable;
+//        mergeParams.tables[1] = stable;
+//
+//        mergeTables(&mergeParams);
+//        return 0;
+//    }
+//}
 
 

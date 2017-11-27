@@ -315,9 +315,9 @@ void printTable (FILE * stream, char *** table, unsigned int rows) {
 // If <areNumbers> is set to 0, returns 0 if <y> is lexicographically before <x>,
 // else returns 1. If <areNumbers> is set to anything besides 0, converts <x> and
 // <y> to double values x y respectively, and returns x <= y.
-int isXBeforeY (const char * x, const char * y, int areNumbers) {
+int isXBeforeY (const char * x, const char * y) {
     
-    if (areNumbers) {
+    if (IsNumeric) {
         return atof(x) <= atof(y);
         
     } else {
@@ -354,7 +354,7 @@ int isCsv(const char * csvPath) {
 // If the name of the CSV file located at <path> is A. This function returns
 // the newly allocated string: "<outputDir>/A-sorted-<columnHeader>.csv". To
 // free, free the returned pointer.
-void printToSortedCsvPath(const char * csvPath, const char * columnHeader, const char * outputDir, char *** table, unsigned int rows) {
+void printToSortedCsvPath(const char * csvPath, char *** table, unsigned int rows) {
     
     char * fileName = strrchr(csvPath, '/') + 1;
     unsigned long fileLen = strlen(fileName);
@@ -363,8 +363,8 @@ void printToSortedCsvPath(const char * csvPath, const char * columnHeader, const
     strcpy(prefix, fileName);
     prefix[fileLen - 4] = '\0';
     
-    char sortedCsvPath[strlen(outputDir) + fileLen + strlen(columnHeader) + 10];
-    sprintf(sortedCsvPath, "%s/%s-sorted-%s.csv", outputDir, prefix, columnHeader);
+    char sortedCsvPath[strlen(OutputDir) + fileLen + strlen(Header) + 10];
+    sprintf(sortedCsvPath, "%s/%s-sorted-%s.csv", OutputDir, prefix, Header);
     
     FILE * out = fopen(sortedCsvPath, "w");
     printTable(out, table, rows);
@@ -588,16 +588,16 @@ void * processCsvDir(void * threadParams) {
         if ((entry->d_type == DT_DIR && strcmp(entry->d_name, ".") && strcmp(entry->d_name, "..")) || entry->d_type == DT_REG) {
             
             struct threadParams * subParams = (struct threadParams *) malloc(sizeof(struct threadParams));
-            subParams->header = params->header;
-            subParams->isNumeric = params->isNumeric;
             subParams->output = params->output;
-            subParams->sortIndex = params->sortIndex;
             sprintf(subParams->path, "%s/%s", params->path, entry->d_name);
             
             if (entry->d_type == DT_DIR) {
                 pthread_create(children + cc, NULL, processCsvDir, subParams);
+                
             } else {
+                
                 pthread_create(children + cc, NULL, sortCsv, subParams);
+                increment();
             }
             
             cc++;

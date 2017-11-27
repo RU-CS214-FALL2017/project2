@@ -3,9 +3,13 @@
 
 #include "tools.h"
 
-extern pthread_mutex_t m;
-extern struct table * * tables;
-extern unsigned int tc;
+extern pthread_mutex_t M;
+extern int CsvCounter;
+
+extern char * Header;
+extern unsigned int SortIndex;
+extern int IsNumeric;
+extern char * OutputDir;
 
 struct mergeTablesParams {
     
@@ -15,7 +19,10 @@ struct mergeTablesParams {
     int isNumeric;
 };
 
+void increment(void);
+void decrement(void);
 void * sortCsv(void * threadParams);
-void * mergeTables(void * parameters);
+//struct table * mergeTables(struct table ** tables, unsigned int numTables, unsigned int sortIndex, int isNumeric);
+//void * mergeTablesHelper(void * parameters);
 
 #endif /* sorter_h */

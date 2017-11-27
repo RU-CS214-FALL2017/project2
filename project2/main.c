@@ -16,38 +16,44 @@
 
 int main(int argc, char ** argv) {
     
+    IsNumeric = 0;
+    SortIndex = 11;
+    Header = "movie_title";
+    OutputDir = "out";
+    
     struct threadParams * params = (struct threadParams *) malloc(sizeof(struct threadParams));
-    params->header = "movie_title";
-    params->isNumeric = 0;
-    params->output = "out";
-    params->sortIndex = 11;
+//    params->header = "movie_title";
+//    params->isNumeric = 0;
+//    params->output = "out";
+//    params->sortIndex = 11;
     sprintf(params->path, "in");
     
-    pthread_mutex_init(&m, NULL);
-    tables = malloc(sizeof(struct table *) * TEMPSIZE);
+//    pthread_mutex_init(&m, NULL);
+//    tables = malloc(sizeof(struct table *) * TEMPSIZE);
     
     pthread_t kid;
     pthread_create(&kid, NULL, processCsvDir, params);
     
-    struct mergeTablesParams * params2 = malloc(sizeof(struct mergeTablesParams));
-    params2->isNumeric = 0;
-    params2->numTables = tc;
-    params2->sortIndex = 11;
-    params2->tables = tables;
-    
-    pthread_t kid2;
-    void * ret;
+//    struct mergeTablesParams * params2 = malloc(sizeof(struct mergeTablesParams));
+//
+//    pthread_t kid2;
+//    void * ret;
     
     pthread_join(kid, NULL);
     
-    pthread_create(&kid2, NULL, mergeTables, params2);
-    pthread_join(kid2, &ret);
-    struct table * retTable = ret;
+//    params2->isNumeric = 0;
+//    params2->numTables = tc;
+//    params2->sortIndex = 11;
+//    params2->tables = tables;
+//
+//    pthread_create(&kid2, NULL, mergeTablesHelper, params2);
+//    pthread_join(kid2, &ret);
+//    struct table * retTable = ret;
+//
+//    printToSortedCsvPath("in/all.csv", "movie_title", "out", retTable->table, retTable->numRows);
     
-    printToSortedCsvPath("in/all.csv", "movie_title", "out", retTable->table, retTable->numRows);
     
-    
-    printf("done\n");
+    printf("done %d\n", CsvCounter);
 
     
     return 0;
