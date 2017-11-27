@@ -76,7 +76,7 @@ void * sortCsv(void * threadParams) {
 
     pushTable(table);
     
-    return NULL;
+    pthread_exit(NULL);
 }
 
 // Ascendingly sorts <table> with <rows> rows and <columns> columns according to
