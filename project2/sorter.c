@@ -8,15 +8,16 @@
 //#include "tools.h"
 #include "sorter.h"
 #include "memTools.h"
+#include "queue.h"
 
 
 int CsvCounter = 0;
 pthread_mutex_t CCM = PTHREAD_MUTEX_INITIALIZER;
 
-sem_t S;
-pthread_t JoiningThreads[2];
-unsigned int JTC = 0;
-pthread_mutex_t JTM = PTHREAD_MUTEX_INITIALIZER;
+//sem_t S;
+//pthread_t JoiningThreads[2];
+//unsigned int JTC = 0;
+//pthread_mutex_t JTM = PTHREAD_MUTEX_INITIALIZER;
 
 char * Header;
 unsigned int SortIndex;
@@ -73,7 +74,7 @@ void * sortCsv(void * threadParams) {
     
     mergeSort(table->table, 1, table->numRows);
 
-    mergeTables(table);
+    pushTable(table);
     
     return NULL;
 }

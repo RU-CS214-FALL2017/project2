@@ -6,7 +6,7 @@
 extern int CsvCounter;
 extern pthread_mutex_t CCM;
 
-extern sem_t S;
+//extern sem_t S;
 
 extern char * Header;
 extern unsigned int SortIndex;
