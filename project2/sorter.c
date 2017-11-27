@@ -3,13 +3,20 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <pthread.h>
+#include <semaphore.h>
 
 //#include "tools.h"
 #include "sorter.h"
 #include "memTools.h"
 
-pthread_mutex_t M;
+
 int CsvCounter = 0;
+pthread_mutex_t CCM = PTHREAD_MUTEX_INITIALIZER;
+
+sem_t S;
+pthread_t JoiningThreads[2];
+unsigned int JTC = 0;
+pthread_mutex_t JTM = PTHREAD_MUTEX_INITIALIZER;
 
 char * Header;
 unsigned int SortIndex;
@@ -18,16 +25,16 @@ char * OutputDir;
 
 void increment() {
     
-    pthread_mutex_lock(&M);
+    pthread_mutex_lock(&CCM);
     CsvCounter++;
-    pthread_mutex_unlock(&M);
+    pthread_mutex_unlock(&CCM);
 }
 
 void decrement() {
     
-    pthread_mutex_lock(&M);
+    pthread_mutex_lock(&CCM);
     CsvCounter--;
-    pthread_mutex_unlock(&M);
+    pthread_mutex_unlock(&CCM);
 }
 
 //void sortByHeaders(const char * csvPath, const char * columnHeaders, char *** table,
@@ -212,7 +219,7 @@ void mergeTables(struct table * table) {
         pthread_exit(NULL);
     }
     
-    printf("yurr\n");
+    
 }
 
 //struct table * mergeTables(struct table ** tables, unsigned int numTables, unsigned int sortIndex, int isNumeric) {

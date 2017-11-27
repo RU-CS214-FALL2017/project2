@@ -3,8 +3,10 @@
 
 #include "tools.h"
 
-extern pthread_mutex_t M;
 extern int CsvCounter;
+extern pthread_mutex_t CCM;
+
+extern sem_t S;
 
 extern char * Header;
 extern unsigned int SortIndex;
