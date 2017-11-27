@@ -65,15 +65,10 @@ void * sortCsv(void * threadParams) {
     }
     
     mergeSort(table->table, 1, table->numRows);
-    printToSortedCsvPath(params->path, table->table, table->numRows);
+
+    mergeTables(table);
     
-//    freeTable(table);
-//
-//    printf("sorted, %s\n", params->path);
-//    fflush(stdout);
-    
-    free(threadParams);
-    pthread_exit(NULL);
+    return NULL;
 }
 
 // Ascendingly sorts <table> with <rows> rows and <columns> columns according to
@@ -209,12 +204,15 @@ void merge(char *** table, unsigned int start, unsigned int mid, unsigned int en
     }
 }
 
-void mergeTables(struct table * table, unsigned int sortIndex, int isNumeric) {
+void mergeTables(struct table * table) {
     
     if (CsvCounter == 1) {
-        
-        
+        printf("fuck you\n");
+        printToSortedCsvPath("in/all.csv", table->table, table->numRows);
+        pthread_exit(NULL);
     }
+    
+    printf("yurr\n");
 }
 
 //struct table * mergeTables(struct table ** tables, unsigned int numTables, unsigned int sortIndex, int isNumeric) {

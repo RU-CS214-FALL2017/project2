@@ -22,6 +22,7 @@ struct mergeTablesParams {
 void increment(void);
 void decrement(void);
 void * sortCsv(void * threadParams);
+void mergeTables(struct table * table);
 //struct table * mergeTables(struct table ** tables, unsigned int numTables, unsigned int sortIndex, int isNumeric);
 //void * mergeTablesHelper(void * parameters);
 
