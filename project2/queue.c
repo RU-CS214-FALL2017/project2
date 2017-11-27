@@ -35,7 +35,13 @@ void pushTable(struct table * table) {
     
     pthread_mutex_lock(&m);
     
-    tail->next = newNode;
+    if (elements == 0) {
+        head = newNode;
+        
+    } else {
+        tail->next = newNode;
+    }
+    
     tail = newNode;
     
     elements++;
