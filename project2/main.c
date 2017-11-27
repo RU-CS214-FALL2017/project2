@@ -32,7 +32,7 @@ int main(int argc, char ** argv) {
 //    pthread_mutex_init(&m, NULL);
 //    tables = malloc(sizeof(struct table *) * TEMPSIZE);
     
-    sem_init(&S, 0, 2);
+//    sem_init(&S, 0, 2);
     
     pthread_t kid;
     pthread_create(&kid, NULL, processCsvDir, params);
