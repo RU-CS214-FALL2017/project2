@@ -4,14 +4,15 @@
 #include "tools.h"
 
 extern pthread_cond_t CV;
+extern unsigned int QElements;
 
 struct node {
   
-    struct table * table;
+    pthread_t tid;
     struct node * next;
 };
 
-struct table * popTable();
-void pushTable(struct table * table);
+pthread_t popTid(void);
+void pushTid(pthread_t tid);
 
 #endif /* queue_h */
