@@ -5,6 +5,11 @@
 
 extern int CsvCounter;
 extern pthread_mutex_t CCM;
+extern pthread_mutex_t QM;
+
+extern int DoneSorting;
+extern pthread_cond_t DSCV;
+extern pthread_mutex_t DSM;
 
 //extern sem_t S;
 
@@ -24,7 +29,8 @@ struct mergeTablesParams {
 void increment(void);
 void decrement(void);
 void * sortCsv(void * threadParams);
-void mergeTables(struct table * table);
+void mergeThreads(struct table * table);
+void mergeTables(struct table * table1, struct table * table2);
 //struct table * mergeTables(struct table ** tables, unsigned int numTables, unsigned int sortIndex, int isNumeric);
 //void * mergeTablesHelper(void * parameters);
 
