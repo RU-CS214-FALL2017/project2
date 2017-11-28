@@ -4,38 +4,38 @@
 #include "queue.h"
 
 pthread_cond_t CV = PTHREAD_COND_INITIALIZER;
-pthread_mutex_t m = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t QM = PTHREAD_MUTEX_INITIALIZER;
 
 struct node * head;
 struct node * tail;
 
-unsigned int elements = 0;
+unsigned int QElements = 0;
 
-struct table * popTable() {
+pthread_t popTid() {
     
-    pthread_mutex_lock(&m);
+    pthread_mutex_lock(&QM);
     
-    elements--;
+    QElements--;
     
     struct node * oldHead = head;
     head = oldHead->next;
     
-    pthread_mutex_unlock(&m);
+    pthread_mutex_unlock(&QM);
     
-    struct table * ret = oldHead->table;
+    pthread_t ret = oldHead->tid;
     free(oldHead);
     
     return ret;
 }
 
-void pushTable(struct table * table) {
+void pushTid(pthread_t tid) {
     
     struct node * newNode = (struct node *) malloc(sizeof(struct node));
-    newNode->table = table;
+    newNode->tid = tid;
     
-    pthread_mutex_lock(&m);
+    pthread_mutex_lock(&QM);
     
-    if (elements == 0) {
+    if (QElements == 0) {
         head = newNode;
         
     } else {
@@ -44,11 +44,11 @@ void pushTable(struct table * table) {
     
     tail = newNode;
     
-    elements++;
+    QElements++;
     
-    if(elements > 1) {
+    if(QElements > 1) {
         pthread_cond_signal(&CV);
     }
     
-    pthread_mutex_unlock(&m);
+    pthread_mutex_unlock(&QM);
 }
