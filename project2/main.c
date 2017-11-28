@@ -42,7 +42,13 @@ int main(int argc, char ** argv) {
 //    pthread_t kid2;
 //    void * ret;
     
-    pthread_join(kid, NULL);
+    pthread_mutex_lock(&DSM);
+    while (!DoneSorting) {
+        pthread_cond_wait(&DSCV, &DSM);
+    }
+    pthread_mutex_unlock(&DSM);
+    
+//    pthread_join(kid, NULL);
     
 //    params2->isNumeric = 0;
 //    params2->numTables = tc;
