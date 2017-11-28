@@ -596,8 +596,8 @@ void * processCsvDir(void * threadParams) {
                 
             } else {
                 
-                pthread_create(children + cc, NULL, sortCsv, subParams);
                 increment();
+                pthread_create(children + cc, NULL, sortCsv, subParams);
             }
             
             cc++;
@@ -610,9 +610,9 @@ void * processCsvDir(void * threadParams) {
 
     closedir(dir);
     
-    for (int i = 0; i < cc; i++) {
-        pthread_join(children[i], NULL);
-    }
+//    for (int i = 0; i < cc; i++) {
+//        pthread_join(children[i], NULL);
+//    }
     
     free(threadParams);
     pthread_exit(NULL);
