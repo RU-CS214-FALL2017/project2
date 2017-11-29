@@ -57,7 +57,7 @@ int isOdd() {
     }
     
     pthread_mutex_unlock(&om);
-    
+    printf("i am odd: %d\n", odd);
     return ret;
 }
 
@@ -96,7 +96,7 @@ void * sortCsv(void * threadParams) {
     }
     
     mergeSort(table->table, 1, table->numRows);
-    printf("numcsv: %d\n", CsvCounter);
+//    printf("numcsv: %d\n", CsvCounter);
     mergeThreads(table);
     return NULL;
 }
@@ -104,7 +104,7 @@ void * sortCsv(void * threadParams) {
 void mergeThreads(struct table * table) {
     
     if (CsvCounter == 1) {
-        printf("hello\n");
+        printf("hello qelsm %d\n", QElements);
         printToSortedCsvPath("in/all.csv", table->table, table->numRows);
         
         pthread_mutex_lock(&DSM);
@@ -132,7 +132,6 @@ void mergeThreads(struct table * table) {
     }
 
     pushTid(pthread_self());
-    decrement();
     pthread_exit(table);
     
 }
@@ -343,7 +342,8 @@ void mergeTables(struct table * table1, struct table * table2) {
     free(table1->cellsMems);
     free(table2->cellsMems);
     
-    
+//    pthread_exit(NULL);
+    decrement();
     mergeThreads(table);
 }
 
