@@ -96,9 +96,7 @@ void * sortCsv(void * threadParams) {
     }
     
     mergeSort(table->table, 1, table->numRows);
-
-//    pushTable(table);
-    
+    printf("numcsv: %d\n", CsvCounter);
     mergeThreads(table);
     return NULL;
 }
@@ -106,7 +104,7 @@ void * sortCsv(void * threadParams) {
 void mergeThreads(struct table * table) {
     
     if (CsvCounter == 1) {
-        
+        printf("hello\n");
         printToSortedCsvPath("in/all.csv", table->table, table->numRows);
         
         pthread_mutex_lock(&DSM);
@@ -117,25 +115,26 @@ void mergeThreads(struct table * table) {
         pthread_exit(NULL);
     }
     
-    if (!isOdd()) {
+    if (isOdd()) {
+
+        void * ret;
         
-        pushTid(pthread_self());
-        decrement();
-        pthread_exit(table);
+        pthread_mutex_lock(&QM);
+        while(QElements == 0) {
+            pthread_cond_wait(&QCV, &QM);
+        }
+        pthread_join(popTid(), &ret);
+        pthread_mutex_unlock(&QM);
+        
+        struct table * table2 = (struct table *) ret;
+        
+        mergeTables(table, table2);
     }
+
+    pushTid(pthread_self());
+    decrement();
+    pthread_exit(table);
     
-    void * ret;
-    
-    pthread_mutex_lock(&QM);
-    while(QElements == 0) {
-        pthread_cond_wait(&CV, &QM);
-    }
-    pthread_join(popTid(), &ret);
-    pthread_mutex_unlock(&QM);
-    
-    struct table * table2 = (struct table *) ret;
-    
-    mergeTables(table, table2);
 }
 
 // Ascendingly sorts <table> with <rows> rows and <columns> columns according to
@@ -274,13 +273,14 @@ void merge(char *** table, unsigned int start, unsigned int mid, unsigned int en
 void mergeTables(struct table * table1, struct table * table2) {
     
     struct table * table = (struct table *) malloc(sizeof(struct table));
-    table->table = (char ***) malloc(sizeof(char **) * (table1->numRows + table2->numRows));
+    table->table = (char ***) malloc(sizeof(char **) * (table1->numRows + table2->numRows - 1));
+    table->numRows = table1->numRows + table2->numRows - 1;
     
-    //        free(params->tables);
+    unsigned int fc = 1;
+    unsigned int sc = 1;
+    unsigned int tc = 1;
     
-    unsigned int fc = 0;
-    unsigned int sc = 0;
-    unsigned int tc = 0;
+    table->table[0] = table1->table[0];
     
     while (fc < table1->numRows && sc < table2->numRows) {
         
@@ -312,8 +312,8 @@ void mergeTables(struct table * table1, struct table * table2) {
         tc++;
     }
     
-    //        free(table1->table);
-    //        free(table2->table);
+    free(table1->table);
+    free(table2->table);
     
     table->rowsMems = (char * **) malloc(sizeof(char **) * (table1->numRowsMems + table2->numRowsMems));
     unsigned int trmc = 0;
@@ -326,8 +326,8 @@ void mergeTables(struct table * table1, struct table * table2) {
         trmc++;
     }
     table->numRowsMems = trmc;
-    //        free(table1->rowsMems);
-    //        free(table2->rowsMems);
+    free(table1->rowsMems);
+    free(table2->rowsMems);
     
     table->cellsMems = (char * *) malloc(sizeof(char *) * (table1->numCellsMems + table2->numCellsMems));
     unsigned int tcmc = 0;
@@ -340,8 +340,8 @@ void mergeTables(struct table * table1, struct table * table2) {
         tcmc++;
     }
     table->numCellsMems = tcmc;
-    //        free(table1->cellsMems);
-    //        free(table2->cellsMems);
+    free(table1->cellsMems);
+    free(table2->cellsMems);
     
     
     mergeThreads(table);
