@@ -14,7 +14,7 @@ struct table {
     unsigned int numCellsMems;
 };
 
-void * processCsvDir(void * path);
+void * processCsvDir(void * param);
 unsigned int getIndex(const char * header, int * isNumeric);
 void checkDir(const char * path, const char * dirType);
 void printToSortedCsv(struct table * table);

@@ -16,6 +16,6 @@ extern char * OutputDir;
 
 void increment(void);
 void decrement(void);
-void * sortCsv(void * threadParams);
+void * sortCsv(void * param);
 
 #endif /* sorter_h */

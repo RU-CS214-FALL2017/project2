@@ -237,7 +237,9 @@ void mergeThreads(struct table * table) {
 // Sorts a the CSV file at <csvPath> in ascending order on the
 // column header <columnHeader> at index <sortIndex>. Saves the
 // sorted csv file in <outputDir>.
-void * sortCsv(void * path) {
+void * sortCsv(void * param) {
+    
+    char * path = param;
     
     if (!isCsv(path)) {
         

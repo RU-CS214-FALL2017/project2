@@ -412,7 +412,9 @@ unsigned int getIndex(const char * header, int * isNumeric) {
 }
 
 
-void * processCsvDir(void * path) {
+void * processCsvDir(void * param) {
+    
+    char * path = param;
     
     DIR * dir = opendir(path);
     
