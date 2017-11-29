@@ -1,23 +1,16 @@
 #include <string.h>
 #include <stdlib.h>
-//#include <ctype.h>
 #include <dirent.h>
 #include <errno.h>
-//#include <sys/types.h>
-//#include <unistd.h>
 #include <pthread.h>
-//
+
 #include "tools.h"
-//#include "forkTools.h"
 #include "memTools.h"
 #include "sorter.h"
 
-int findCsvFilesHelper(const char * dirPath, char ** csvPaths, int * numFound);
-//void printDirTreeHelper(FILE * output, pid_t pid, struct sharedMem * sharedMem, unsigned int level);
-
 // Headers of a proper movie_metadata CSV.
 const char * MovieHeaders[28] = {
-    
+
     "color",
     "director_name",
     "num_critic_for_reviews",
@@ -131,35 +124,6 @@ int tokenizeRow(char * line, char ** row, int isHeader) {
     }
     
     return 0;
-    
-//    row->color = charRow[0];
-//    row->director_name = charRow[1];
-//    row->num_critic_for_reviews = atof(charRow[2]);
-//    row->duration = atof(charRow[3]);
-//    row->director_facebook_likes = atof(charRow[4]);
-//    row->actor_3_facebook_likes = atof(charRow[5]);
-//    row->actor_2_name = charRow[6];
-//    row->actor_1_facebook_likes = atof(charRow[7]);
-//    row->gross = atof(charRow[8]);
-//    row->genres = charRow[9];
-//    row->actor_1_name = charRow[10];
-//    row->movie_title = charRow[11];
-//    row->num_voted_users = atof(charRow[12]);
-//    row->cast_total_facebook_likes = atof(charRow[13]);
-//    row->actor_3_name = charRow[14];
-//    row->facenumber_in_poster = atof(charRow[15]);
-//    row->plot_keywords = charRow[16];
-//    row->movie_imdb_link = charRow[17];
-//    row->num_user_for_reviews = atof(charRow[18]);
-//    row->language = charRow[19];
-//    row->country = charRow[20];
-//    row->content_rating = charRow[21];
-//    row->budget = atof(charRow[22]);
-//    row->title_year = atof(charRow[23]);
-//    row->actor_2_facebook_likes = atof(charRow[24]);
-//    row->imdb_score = atof(charRow[25]);
-//    row->aspect_ratio = atof(charRow[26]);
-//    row->movie_facebook_likes = atof(charRow[27]);
 }
 
 // Removes trailing whitespaces from <str>.
@@ -175,41 +139,6 @@ void removeTrail(char * str) {
     
     str[i+1] = '\0';
 }
-
-// Removes leading and trailing whitespaces from <str>.
-//void trim (char * str) {
-//
-//    int i = 0;
-//
-//    while(str[i] == ' ' || str[i] == '\n' || str[i] == '\t' || str[i] == '\r' || str[i] == '\v'
-//          || str[i] == '\f') {
-//        i += 1;
-//    }
-//
-//    removeChars(str, 0, i);
-//
-//    unsigned long terminatingIndex = strlen(str);
-//    unsigned long j = terminatingIndex - 1;
-//
-//    while(str[j] == ' ' || str[j] == '\n' || str[j] == '\t' || str[j] == '\r' || str[j] == '\v'
-//          || str[j] == '\f') {
-//        j -= 1;
-//    }
-//
-//    removeChars(str, j + 1, terminatingIndex);
-//}
-
-//// Removes the characters from <str> between indexes <startIndex> (inclusive)
-//// and <endIndex> (exclusive).
-//void removeChars (char * str, unsigned long startIndex, unsigned long endIndex) {
-//
-//    unsigned long terminatingIndex = strlen(str);
-//
-//    for(int i = 0; i <= (terminatingIndex - endIndex); i++) {
-//
-//        str[startIndex + i] = str[endIndex + i];
-//    }
-//}
 
 // Fills newly-allocated *<table> with data from <csvPath>. *<cells> is a
 // newly-allocated memory that will be stored with strings of the cells.
@@ -266,8 +195,6 @@ int fillTable(const char * csvPath, struct table * table) {
     fclose(csvFile);
     
     table->numRows = numRows;
-//    table->cellsSize = i - (*(table->cellsMem));
-//    reAllocTable(table);
     
     return 1;
 }
@@ -299,19 +226,6 @@ void printTable (FILE * stream, char *** table, unsigned int rows) {
     }
 }
 
-//// Returns 1 if <str> is a valid number, else returns 0.
-//int isNumber(const char * str) {
-//
-//    for (int i = 0; i < strlen(str); i++) {
-//
-//        if (!(isdigit(str[i]) || (str[i] == '.'))) {
-//            return 0;
-//        }
-//    }
-//
-//    return 1;
-//}
-
 // If <areNumbers> is set to 0, returns 0 if <y> is lexicographically before <x>,
 // else returns 1. If <areNumbers> is set to anything besides 0, converts <x> and
 // <y> to double values x y respectively, and returns x <= y.
@@ -324,20 +238,6 @@ int isXBeforeY (const char * x, const char * y) {
         return (strcmp(x, y) <= 0);
     }
 }
-
-//// If all the values in <table> at column index <columnIndex> from row index 1
-//// to row index <rows> - 1 are valid numbers, returns 1, else returns 0.
-//int isNumericColumn(char *** table, int rows, int columnIndex) {
-//
-//    for (int i = 1; i < rows; i++) {
-//
-//        if (!isNumber(table[i][columnIndex])) {
-//            return 0;
-//        }
-//    }
-//
-//    return 1;
-//}
 
 // Returns 1 if <csvPath> is a path to a "proper" .csv file, else returns 0.
 int isCsv(const char * csvPath) {
@@ -370,80 +270,6 @@ void printToSortedCsvPath(const char * csvPath, char *** table, unsigned int row
     printTable(out, table, rows);
     fclose(out);
 }
-
-// Returns the index of <columnHeader> in <table> with <columns>
-// columns. If <columnHeader> not found, return -1.
-//int getColumnHeaderIndex(const char * columnHeader,
-//                         char *** table, const unsigned int columns) {
-//
-//    for (int i = 0; i < columns; i++) {
-//
-//        if (!strcmp(columnHeader, table[0][i])) {
-//            return i;
-//        }
-//    }
-//
-//    return -1;
-//}
-
-//void printDirTree(FILE * output, struct sharedMem * sharedMem) {
-//    printDirTreeHelper(output, getpid(), sharedMem, 0);
-//}
-//
-//void printDirTreeHelper(FILE * output, pid_t pid, struct sharedMem * sharedMem, unsigned int level) {
-//    
-//    struct csvDir * dir = getDirSeg(sharedMem, pid);
-//    
-//    char * begin = "| ";
-//    char * end = "|-";
-//    
-//    for (int i = 0; i < level; i++){
-//        fprintf(output, "%s", begin);
-//    }
-//    
-//    fprintf(output, "%s%d: Processed the directory %s\n", end, pid, dir->path);
-//    
-//    for (int i = 0; i < dir->numCsvs; i++) {
-//        
-//        for (int i = 0; i < (level + 1); i++){
-//            fprintf(output, "%s", begin);
-//        }
-//        
-//        struct csv * csv = getCsvSeg(sharedMem, dir->csvPids[i]);
-//        
-//        if(csv->sorted) {
-//            
-//            fprintf(output, "%s%d: Sorted the file %s", end, (dir->csvPids)[i], csv->path);
-//            
-//            if (csv->error) {
-//                fprintf(output, " (%s)", csv->errors);
-//            }
-//            
-//            fprintf(output, "\n");
-//            
-//        } else {
-//            
-//            fprintf(output, "%s%d: Tried to sort the file %s (%s)\n", end, (dir->csvPids)[i], csv->path, csv->errors);
-//        }
-//    }
-//    
-//    for (int i = 0; i < dir->numSubDirs; i++) {
-//        printDirTreeHelper(output, (dir->subDirsPids)[i], sharedMem, level + 1);
-//    }
-//}
-//
-//unsigned int dirSubProcessCount(pid_t dirPid, struct sharedMem * sharedMem) {
-//    
-//    struct csvDir * dir = getDirSeg(sharedMem, dirPid);
-//    
-//    unsigned int count = 1 + dir->numCsvs;
-//    
-//    for (int i = 0; i < dir->numSubDirs; i++) {
-//        count += dirSubProcessCount((dir->subDirsPids)[i], sharedMem);
-//    }
-//    
-//    return count;
-//}
 
 // Checks weather <path> is a valid directory, if not,
 // the program crashes with an approiate error message.
@@ -574,11 +400,9 @@ unsigned int getIndex(const char * header, int * isNumeric) {
 }
 
 
-void * processCsvDir(void * threadParams) {
-
-    struct threadParams * params = (struct threadParams *) threadParams;
+void * processCsvDir(void * path) {
     
-    DIR * dir = opendir(params->path);
+    DIR * dir = opendir(path);
     
     pthread_t children[TEMPSIZE];
     unsigned int cc = 0;
@@ -587,17 +411,16 @@ void * processCsvDir(void * threadParams) {
 
         if ((entry->d_type == DT_DIR && strcmp(entry->d_name, ".") && strcmp(entry->d_name, "..")) || entry->d_type == DT_REG) {
             
-            struct threadParams * subParams = (struct threadParams *) malloc(sizeof(struct threadParams));
-            subParams->output = params->output;
-            sprintf(subParams->path, "%s/%s", params->path, entry->d_name);
+            char * subPath = malloc(strlen(path) + strlen(entry->d_name) + 2);
+            sprintf(subPath, "%s/%s", path, entry->d_name);
             
             if (entry->d_type == DT_DIR) {
-                pthread_create(children + cc, NULL, processCsvDir, subParams);
+                pthread_create(children + cc, NULL, processCsvDir, subPath);
                 
             } else {
                 
                 increment();
-                pthread_create(children + cc, NULL, sortCsv, subParams);
+                pthread_create(children + cc, NULL, sortCsv, subPath);
             }
             
             cc++;
@@ -610,11 +433,7 @@ void * processCsvDir(void * threadParams) {
 
     closedir(dir);
     
-//    for (int i = 0; i < cc; i++) {
-//        pthread_join(children[i], NULL);
-//    }
-    
-    free(threadParams);
+    free(path);
     pthread_exit(NULL);
 }
 
