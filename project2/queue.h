@@ -3,7 +3,8 @@
 
 #include "tools.h"
 
-extern pthread_cond_t CV;
+extern pthread_cond_t QCV;
+extern pthread_mutex_t QM;
 extern unsigned int QElements;
 
 struct node {
