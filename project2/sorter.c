@@ -1,19 +1,15 @@
-#include <string.h>
+#include <stdio.h>
 #include <stdlib.h>
-#include <sys/types.h>
-#include <unistd.h>
 #include <pthread.h>
-#include <semaphore.h>
 
-#include "sorter.h"
-#include "memTools.h"
 #include "queue.h"
+#include "tools.h"
 
 int CsvCounter = 0;
 pthread_mutex_t CCM = PTHREAD_MUTEX_INITIALIZER;
 
-int odd;
-pthread_mutex_t om = PTHREAD_MUTEX_INITIALIZER;
+int Odd;
+pthread_mutex_t OM = PTHREAD_MUTEX_INITIALIZER;
 
 int DoneSorting = 0;
 pthread_cond_t DSCV = PTHREAD_COND_INITIALIZER;
@@ -40,18 +36,18 @@ void decrement() {
 
 int isOdd() {
     
-    pthread_mutex_lock(&om);
+    pthread_mutex_lock(&OM);
     
-    int ret = odd;
+    int ret = Odd;
     
-    if (odd) {
-        odd = 0;
+    if (Odd) {
+        Odd = 0;
     } else {
-        odd = 1;
+        Odd = 1;
     }
     
-    pthread_mutex_unlock(&om);
-    printf("i am odd: %d\n", odd);
+    pthread_mutex_unlock(&OM);
+    
     return ret;
 }
 
@@ -123,72 +119,7 @@ void mergeSort(char *** table, unsigned int start, unsigned int end) {
     }
 }
 
-// Sorts a the CSV file at <csvPath> in ascending order on the
-// column header <columnHeader> at index <sortIndex>. Saves the
-// sorted csv file in <outputDir>.
-void * sortCsv(void * path) {
-    
-    if (!isCsv(path)) {
-        
-        fprintf(stderr, "Not a CSV file: %s\n", path);
-        fflush(stderr);
-        free(path);
-        decrement();
-        pthread_exit(NULL);
-    }
-    
-    struct table * table = malloc(sizeof(struct table));
-    
-    if (!fillTable(path, table)) {
-        
-        fprintf(stderr, "Not a proper movie_metadata CSV file: %s\n", path);
-        fflush(stderr);
-        free(path);
-        decrement();
-        pthread_exit(NULL);
-    }
-    
-    mergeSort(table->table, 1, table->numRows);
-    mergeThreads(table);
-    
-    return NULL;
-}
-
-void mergeThreads(struct table * table) {
-    
-    if (CsvCounter == 1) {
-        printf("hello qelsm %d\n", QElements);
-        printToSortedCsvPath("in/all.csv", table->table, table->numRows);
-        
-        pthread_mutex_lock(&DSM);
-        DoneSorting = 1;
-        pthread_cond_signal(&DSCV);
-        pthread_mutex_unlock(&DSM);
-        
-        pthread_exit(NULL);
-    }
-    
-    if (isOdd()) {
-
-        void * ret;
-        
-        pthread_mutex_lock(&QM);
-        while(QElements == 0) {
-            pthread_cond_wait(&QCV, &QM);
-        }
-        pthread_join(popTid(), &ret);
-        pthread_mutex_unlock(&QM);
-        
-        struct table * table2 = (struct table *) ret;
-        
-        mergeTables(table, table2);
-    }
-
-    pushTid(pthread_self());
-    pthread_exit(table);
-    
-}
-
+void  mergeThreads(struct table * table);
 
 void mergeTables(struct table * table1, struct table * table2) {
     
@@ -263,7 +194,73 @@ void mergeTables(struct table * table1, struct table * table2) {
     free(table1->cellsMems);
     free(table2->cellsMems);
     
-//    pthread_exit(NULL);
     decrement();
     mergeThreads(table);
+}
+
+void mergeThreads(struct table * table) {
+    
+    if (CsvCounter == 1) {
+
+        printToSortedCsv(table);
+        
+        pthread_mutex_lock(&DSM);
+        DoneSorting = 1;
+        pthread_cond_signal(&DSCV);
+        pthread_mutex_unlock(&DSM);
+        
+        freeTable(table);
+        pthread_exit(NULL);
+    }
+    
+    if (isOdd()) {
+        
+        void * ret;
+        
+        pthread_mutex_lock(&QM);
+        while(QElements == 0) {
+            pthread_cond_wait(&QCV, &QM);
+        }
+        pthread_join(popTid(), &ret);
+        pthread_mutex_unlock(&QM);
+        
+        struct table * table2 = (struct table *) ret;
+        
+        mergeTables(table, table2);
+    }
+    
+    pushTid(pthread_self());
+    pthread_exit(table);
+    
+}
+
+// Sorts a the CSV file at <csvPath> in ascending order on the
+// column header <columnHeader> at index <sortIndex>. Saves the
+// sorted csv file in <outputDir>.
+void * sortCsv(void * path) {
+    
+    if (!isCsv(path)) {
+        
+        fprintf(stderr, "Not a CSV file: %s\n", path);
+        fflush(stderr);
+        free(path);
+        decrement();
+        pthread_exit(NULL);
+    }
+    
+    struct table * table = malloc(sizeof(struct table));
+    
+    if (!fillTable(path, table)) {
+        
+        fprintf(stderr, "Not a proper movie_metadata CSV file: %s\n", path);
+        fflush(stderr);
+        free(path);
+        decrement();
+        pthread_exit(NULL);
+    }
+    
+    mergeSort(table->table, 1, table->numRows);
+    mergeThreads(table);
+    
+    return NULL;
 }
