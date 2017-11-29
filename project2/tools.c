@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <dirent.h>
@@ -5,7 +6,6 @@
 #include <pthread.h>
 
 #include "tools.h"
-#include "memTools.h"
 #include "sorter.h"
 
 // Headers of a proper movie_metadata CSV.
@@ -40,6 +40,20 @@ const char * MovieHeaders[28] = {
     "aspect_ratio",
     "movie_facebook_likes"
 };
+
+// Removes trailing whitespaces from <str>.
+void removeTrail(char * str) {
+    
+    unsigned long i = strlen(str);
+    i--;
+    
+    while (str[i] == ' ' || str[i] == '\n' || str[i] == '\t' || str[i] == '\r' || str[i] == '\v'
+           || str[i] == '\f') {
+        i--;
+    }
+    
+    str[i+1] = '\0';
+}
 
 // Tokenizes a CSV row into the pre-allocated <row>. <line> is the
 // pre-allocated CSV line/row to tokenize. Returns 1 if 27 cells
@@ -126,18 +140,23 @@ int tokenizeRow(char * line, char ** row, int isHeader) {
     return 0;
 }
 
-// Removes trailing whitespaces from <str>.
-void removeTrail(char * str) {
+void freeTable(struct table * table) {
     
-    unsigned long i = strlen(str);
-    i--;
+    free(table->table);
     
-    while (str[i] == ' ' || str[i] == '\n' || str[i] == '\t' || str[i] == '\r' || str[i] == '\v'
-           || str[i] == '\f') {
-        i--;
+    for (unsigned int i = 0; i < table->numRowsMems; i++) {
+        free(table->rowsMems[i]);
     }
     
-    str[i+1] = '\0';
+    free(table->rowsMems);
+    
+    for (unsigned int i = 0; i < table->numCellsMems; i++) {
+        free(table->cellsMems[i]);
+    }
+    
+    free(table->cellsMems);
+    
+    free(table);
 }
 
 // Fills newly-allocated *<table> with data from <csvPath>. *<cells> is a
@@ -186,7 +205,7 @@ int fillTable(const char * csvPath, struct table * table) {
         } else if (!numRows) {
             
             fclose(csvFile);
-            freeTable(*table);
+            freeTable(table);
             return 0;
             
         }
@@ -254,20 +273,13 @@ int isCsv(const char * csvPath) {
 // If the name of the CSV file located at <path> is A. This function returns
 // the newly allocated string: "<outputDir>/A-sorted-<columnHeader>.csv". To
 // free, free the returned pointer.
-void printToSortedCsvPath(const char * csvPath, char *** table, unsigned int rows) {
+void printToSortedCsv(struct table * table) {
     
-    char * fileName = strrchr(csvPath, '/') + 1;
-    unsigned long fileLen = strlen(fileName);
-    
-    char prefix[fileLen + 1];
-    strcpy(prefix, fileName);
-    prefix[fileLen - 4] = '\0';
-    
-    char sortedCsvPath[strlen(OutputDir) + fileLen + strlen(Header) + 10];
-    sprintf(sortedCsvPath, "%s/%s-sorted-%s.csv", OutputDir, prefix, Header);
+    char sortedCsvPath[strlen(OutputDir) + strlen(Header) + 17];
+    sprintf(sortedCsvPath, "%s/all-sorted-%s.csv", OutputDir, Header);
     
     FILE * out = fopen(sortedCsvPath, "w");
-    printTable(out, table, rows);
+    printTable(out, table->table, table->numRows);
     fclose(out);
 }
 
@@ -425,8 +437,8 @@ void * processCsvDir(void * path) {
             
             cc++;
             
-//            printf("%lu,", children[cc]);
-//            fflush(stdout);
+            printf("%lu,", children[cc]);
+            fflush(stdout);
 
         }
     }
