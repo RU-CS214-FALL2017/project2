@@ -13,14 +13,10 @@ unsigned int QElements = 0;
 
 pthread_t popTid() {
     
-//    pthread_mutex_lock(&QM);
-    
     QElements--;
     
     struct node * oldHead = head;
     head = oldHead->next;
-    
-//    pthread_mutex_unlock(&QM);
     
     pthread_t ret = oldHead->tid;
     free(oldHead);
