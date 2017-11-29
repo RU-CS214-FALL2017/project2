@@ -1,19 +1,9 @@
-//#include <string.h>
-//#include <stdlib.h>
-//#include <dirent.h>
-//#include <unistd.h>
-//#include <sys/types.h>
-//#include <sys/wait.h>
-//#include <fcntl.h>
-//#include <sys/mman.h>
-//#include <sys/stat.h>
-//#include <errno.h>
-//#include <stdio.h>
 #include <pthread.h>
 #include <stdlib.h>
-#include <semaphore.h>
+#include <stdio.h>
 
 #include "sorter.h"
+#include "tools.h"
 
 int main(int argc, char ** argv) {
     
@@ -22,12 +12,12 @@ int main(int argc, char ** argv) {
     Header = "movie_title";
     OutputDir = "out";
     
-    struct threadParams * params = (struct threadParams *) malloc(sizeof(struct threadParams));
-    sprintf(params->path, "in");
+    char * path = malloc(3);
+    sprintf(path, "in");
     
     
     pthread_t kid;
-    pthread_create(&kid, NULL, processCsvDir, params);
+    pthread_create(&kid, NULL, processCsvDir, path);
 
     
     pthread_mutex_lock(&DSM);
