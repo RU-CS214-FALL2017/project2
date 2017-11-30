@@ -9,13 +9,16 @@ extern int DoneSorting;
 extern pthread_cond_t DSCV;
 extern pthread_mutex_t DSM;
 
+extern char * CsvErrors;
+extern pthread_mutex_t CEM;
+
 extern char * Header;
 extern unsigned int SortIndex;
 extern int IsNumeric;
 extern char * OutputDir;
 
-void increment(void);
-void decrement(void);
+void incrementCsvCount(void);
+void decrementCsvCount(void);
 void * sortCsv(void * param);
 
 #endif /* sorter_h */

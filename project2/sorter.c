@@ -15,19 +15,22 @@ int DoneSorting = 0;
 pthread_cond_t DSCV = PTHREAD_COND_INITIALIZER;
 pthread_mutex_t DSM = PTHREAD_MUTEX_INITIALIZER;
 
+char * CsvErrors;
+pthread_mutex_t CEM = PTHREAD_MUTEX_INITIALIZER;
+
 char * Header;
 unsigned int SortIndex;
 int IsNumeric;
 char * OutputDir;
 
-void increment() {
+void incrementCsvCount() {
     
     pthread_mutex_lock(&CCM);
     CsvCounter++;
     pthread_mutex_unlock(&CCM);
 }
 
-void decrement() {
+void decrementCsvCount() {
     
     pthread_mutex_lock(&CCM);
     CsvCounter--;
@@ -194,7 +197,7 @@ void mergeTables(struct table * table1, struct table * table2) {
     free(table1->cellsMems);
     free(table2->cellsMems);
     
-    decrement();
+    decrementCsvCount();
     mergeThreads(table);
 }
 
@@ -243,10 +246,12 @@ void * sortCsv(void * param) {
     
     if (!isCsv(path)) {
         
-        fprintf(stderr, "Not a CSV file: %s\n", path);
-        fflush(stderr);
-        free(path);
-        decrement();
+        pthread_mutex_lock(&CEM);
+        CsvErrors += sprintf(CsvErrors, "Not a CSV file: %s\n", path);
+        pthread_mutex_unlock(&CEM);
+        
+        free(param);
+        decrementCsvCount();
         pthread_exit(NULL);
     }
     
@@ -254,13 +259,16 @@ void * sortCsv(void * param) {
     
     if (!fillTable(path, table)) {
         
-        fprintf(stderr, "Not a proper movie_metadata CSV file: %s\n", path);
-        fflush(stderr);
-        free(path);
-        decrement();
+        pthread_mutex_lock(&CEM);
+        CsvErrors += sprintf(CsvErrors, "Not a proper movie_metadata CSV file: %s\n", path);
+        pthread_mutex_unlock(&CEM);
+        
+        free(param);
+        decrementCsvCount();
         pthread_exit(NULL);
     }
     
+    free(param);
     mergeSort(table->table, 1, table->numRows);
     mergeThreads(table);
     

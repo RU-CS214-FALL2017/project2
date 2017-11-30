@@ -4,6 +4,8 @@
 #define TEMPSIZE 4096
 #define COLUMNS 28
 
+extern unsigned int AllThreadsCount;
+
 struct table {
   
     char *** table;

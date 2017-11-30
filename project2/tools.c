@@ -8,6 +8,9 @@
 #include "tools.h"
 #include "sorter.h"
 
+unsigned int AllThreadsCount = 2;
+pthread_mutex_t ATCM = PTHREAD_MUTEX_INITIALIZER;
+
 // Headers of a proper movie_metadata CSV.
 const char * MovieHeaders[28] = {
 
@@ -275,8 +278,8 @@ int isCsv(const char * csvPath) {
 // free, free the returned pointer.
 void printToSortedCsv(struct table * table) {
     
-    char sortedCsvPath[strlen(OutputDir) + strlen(Header) + 17];
-    sprintf(sortedCsvPath, "%s/all-sorted-%s.csv", OutputDir, Header);
+    char sortedCsvPath[strlen(OutputDir) + strlen(Header) + 22];
+    sprintf(sortedCsvPath, "%s/AllFiles-sorted-%s.csv", OutputDir, Header);
     
     FILE * out = fopen(sortedCsvPath, "w");
     printTable(out, table->table, table->numRows);
@@ -433,21 +436,22 @@ void * processCsvDir(void * param) {
                 
             } else {
                 
-                increment();
+                incrementCsvCount();
                 pthread_create(children + cc, NULL, sortCsv, subPath);
             }
             
-            cc++;
+            printf("%lu,", (unsigned long) children[cc]);
             
-            printf("%lu,", children[cc]);
-            fflush(stdout);
-
+            cc++;
         }
     }
+    
+    pthread_mutex_lock(&ATCM);
+    AllThreadsCount += cc;
+    pthread_mutex_unlock(&ATCM);
 
     closedir(dir);
-    
-    free(path);
+    free(param);
     pthread_exit(NULL);
 }
 
