@@ -311,7 +311,7 @@ void checkDir(const char * path, const char * dirType) {
                 break;
                 
             default:
-                fprintf(stderr, "A problem occured opening the specified %s directory, %s", dirType, path);
+                fprintf(stderr, "A problem occured opening the specified %s directory, %s\n", dirType, path);
                 break;
         }
         

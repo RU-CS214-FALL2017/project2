@@ -3,28 +3,54 @@
 #include <stdio.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <string.h>
 
 #include "sorter.h"
 #include "tools.h"
+#include "mainTools.h"
 
 int main(int argc, char ** argv) {
     
-    printf("Initial PID: %d\n\tTIDS of all child threads: ", getpid());
+    Header = getColumnHeader(argc, argv);
+    char * inputDir = getInputDirectory(argc, argv);
     
+    if (inputDir == NULL) {
+        
+        inputDir = malloc(2);
+        sprintf(inputDir, ".");
+        
+    } else {
+        
+        checkDir(inputDir, "input");
+        char * temp = malloc(strlen(inputDir) + 1);
+        strcpy(temp, inputDir);
+        inputDir = temp;
+    }
+    
+    OutputDir = getOutputDirectory(argc, argv);
+    
+    if (OutputDir == NULL) {
+        
+        OutputDir = malloc(2);
+        sprintf(OutputDir, ".");
+        
+    } else {
+        
+        checkDir(OutputDir, "output");
+        char * temp = malloc(strlen(OutputDir) + 1);
+        strcpy(temp, OutputDir);
+        OutputDir = temp;
+    }
+    
+    SortIndex = getIndex(Header, &IsNumeric);
+    
+    printf("Initial PID: %d\n\tTIDS of all child threads: ", getpid());
+
     CsvErrors = malloc(TEMPSIZE * TEMPSIZE);
     char * csvErrors = CsvErrors;
-
-    IsNumeric = 0;
-    SortIndex = 11;
-    Header = "movie_title";
-    OutputDir = "out";
-    
-    char * path = malloc(TEMPSIZE);
-    sprintf(path, "in");
-    
     
     pthread_t kid;
-    pthread_create(&kid, NULL, processCsvDir, path);
+    pthread_create(&kid, NULL, processCsvDir, inputDir);
     
     printf("%lu,", (unsigned long) kid);
     
