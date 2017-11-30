@@ -23,6 +23,8 @@ unsigned int SortIndex;
 int IsNumeric;
 char * OutputDir;
 
+// Increments the total number of proper CSV files.
+// Thread safe.
 void incrementCsvCount() {
     
     pthread_mutex_lock(&CCM);
@@ -30,6 +32,8 @@ void incrementCsvCount() {
     pthread_mutex_unlock(&CCM);
 }
 
+// Decrements the total number of proper CSV files.
+// Thread safe.
 void decrementCsvCount() {
     
     pthread_mutex_lock(&CCM);
@@ -37,6 +41,8 @@ void decrementCsvCount() {
     pthread_mutex_unlock(&CCM);
 }
 
+// Returns 1 if n is odd of the nth caller,
+// else returns 0. Thread safe.
 int isOdd() {
     
     pthread_mutex_lock(&OM);
@@ -122,9 +128,9 @@ void mergeSort(char *** table, unsigned int start, unsigned int end) {
     }
 }
 
-void  mergeThreads(struct table * table);
-
-void mergeTables(struct table * table1, struct table * table2) {
+// Merges <table1> and <table2>. The input tables must be pre-sorted.
+// Returns a new, sorted, merged table.
+struct table * mergeTables(struct table * table1, struct table * table2) {
     
     struct table * table = (struct table *) malloc(sizeof(struct table));
     table->table = (char ***) malloc(sizeof(char **) * (table1->numRows + table2->numRows - 1));
@@ -197,11 +203,16 @@ void mergeTables(struct table * table1, struct table * table2) {
     free(table1->cellsMems);
     free(table2->cellsMems);
     
-    decrementCsvCount();
-    mergeThreads(table);
+    return table;
 }
 
-void mergeThreads(struct table * table) {
+// Merges threads that sort CSV files. <table> is
+// the sorted CSV file of the calling thread. Two
+// threads are matched up at a time on a first-come-
+// first-serve basis. Recursively gets called when
+// Two threads merge. When one thread is left, the
+// final CSV is printed.
+void mergeCsvThreads(struct table * table) {
     
     if (CsvCounter == 1) {
 
@@ -229,17 +240,17 @@ void mergeThreads(struct table * table) {
         
         struct table * table2 = (struct table *) ret;
         
-        mergeTables(table, table2);
+        struct table * mergedTable = mergeTables(table, table2);
+        decrementCsvCount();
+        mergeCsvThreads(mergedTable);
     }
     
     pushTid(pthread_self());
     pthread_exit(table);
-    
 }
 
-// Sorts a the CSV file at <csvPath> in ascending order on the
-// column header <columnHeader> at index <sortIndex>. Saves the
-// sorted csv file in <outputDir>.
+// Sorts CSV file at <param> and merges with all
+// other sorted CSV files.
 void * sortCsv(void * param) {
     
     char * path = param;
@@ -270,7 +281,7 @@ void * sortCsv(void * param) {
     
     free(param);
     mergeSort(table->table, 1, table->numRows);
-    mergeThreads(table);
+    mergeCsvThreads(table);
     
     return NULL;
 }

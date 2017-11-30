@@ -7,6 +7,7 @@ extern pthread_cond_t QCV;
 extern pthread_mutex_t QM;
 extern unsigned int QElements;
 
+// Represents queue's linked-list's node.
 struct node {
   
     pthread_t tid;

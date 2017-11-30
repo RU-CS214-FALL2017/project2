@@ -17,7 +17,7 @@ struct table {
 };
 
 void * processCsvDir(void * param);
-unsigned int getIndex(const char * header, int * isNumeric);
+unsigned int getIndex(const char * header);
 void checkDir(const char * path, const char * dirType);
 void printToSortedCsv(struct table * table);
 int isCsv(const char * csvPath);

@@ -11,6 +11,8 @@ struct node * tail;
 
 unsigned int QElements = 0;
 
+// Reterns the first TID in the queue and
+// removes it.
 pthread_t popTid() {
     
     QElements--;
@@ -24,6 +26,8 @@ pthread_t popTid() {
     return ret;
 }
 
+// Inserts <tid> at the end of the queue.
+// Thread safe.
 void pushTid(pthread_t tid) {
     
     struct node * newNode = (struct node *) malloc(sizeof(struct node));

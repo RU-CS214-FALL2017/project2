@@ -42,7 +42,7 @@ int main(int argc, char ** argv) {
         OutputDir = temp;
     }
     
-    SortIndex = getIndex(Header, &IsNumeric);
+    SortIndex = getIndex(Header);
     
     printf("Initial PID: %d\n\tTIDS of all child threads: ", getpid());
 
@@ -66,5 +66,5 @@ int main(int argc, char ** argv) {
     
     free(csvErrors);
     
-    return 0;
+    exit(EXIT_SUCCESS);
 }
